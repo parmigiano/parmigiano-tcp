@@ -1,0 +1,2 @@
+serverPort=5462
+clientFilesPath=latestClientBuild
