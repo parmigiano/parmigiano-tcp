@@ -3,6 +3,7 @@
 #include <iostream>
 
 SOCKET listenSocket = INVALID_SOCKET;
+fd_set masterSet;
 
 void Connection::createConnection(const char* PORT) {
 	WSADATA wsaData;
@@ -47,8 +48,20 @@ void Connection::createConnection(const char* PORT) {
 		//CH.incomingConnections();
 		std::cout << "Server is started on port: " << PORT << std::endl;
 	}
+
+	
+	FD_ZERO(&masterSet);
+	FD_SET(listenSocket, &masterSet);
 }
 
-SOCKET Connection::getCurrentListenSocket() {
-	return listenSocket;
+fd_set Connection::getMasterSet(){
+	return masterSet;
 }
+
+SOCKET Connection::getListenSocket() {
+	if (listenSocket != INVALID_SOCKET) {
+		return listenSocket;
+	}
+}
+
+

@@ -12,8 +12,9 @@
 class Connection {
 private:
 public:
-	void createConnection(const char* POR);
-	SOCKET getCurrentListenSocket();
+	void createConnection(const char* PORT);
+	fd_set getMasterSet();
+	SOCKET getListenSocket();
 };
 
 #endif 

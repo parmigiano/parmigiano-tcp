@@ -36,11 +36,13 @@ void ConnectionHandler::queueHandler(){
         unique_lock<mutex> lock(queueMutex);
         usQu::iterator it = connectionQueue.begin();
 
-        while (it != connectionQueue.end()) {
+        while (it != connectionQueue.end()) {  // replace to STL queue
             //std::cout << it->clientSocket << std::endl << it->request << std::endl;
             clientSocket = it->clientSocket;
             _requestProcessing.requestDistribution(it->request); //
             it = connectionQueue.erase(it);
+
+            // std::cout << "Received: " << it->request << std::endl;
         }
 
         lock.unlock();
@@ -50,33 +52,55 @@ void ConnectionHandler::queueHandler(){
 void ConnectionHandler::incomingConnections(){
     Connection _Connection;
 
-    SOCKET listenSocket = _Connection.getCurrentListenSocket();
+    SOCKET listenSocket = _Connection.getListenSocket();
+    fd_set masterSet = _Connection.getMasterSet();
     SOCKET clientSocketIncoming = INVALID_SOCKET;
+
+    int socketCount = 0;
 
     char recvBuffer[1024];
 
-    while (true) {
-        memset(recvBuffer, 0, sizeof(recvBuffer));
 
-        if ((clientSocketIncoming = accept(listenSocket, NULL, NULL)) == INVALID_SOCKET) {
-            std::cout << "(!) accept error\n";  
+    while (true) {
+        fd_set copySet = masterSet;
+        timeval timeout;
+
+        timeout.tv_sec = 10;
+        timeout.tv_usec = 0;
+
+        socketCount = select(0, &copySet, nullptr, nullptr, &timeout);
+
+        if (socketCount == 0) {
+            std::cout << "Timeout: haven't new connections" << std::endl;
             continue;
         }
 
-        /*addUserToQueue("", clientSocketIncoming);*/
+        for (int i = 0; i < socketCount; i++) {
+            SOCKET fd_sock = copySet.fd_array[i];
 
+            memset(recvBuffer, 0, sizeof(recvBuffer));
 
-        if (recv(clientSocketIncoming, recvBuffer, sizeof(recvBuffer), 0) > 0) {
-            //string request = recvBuffer;
-            std::cout << "Client has connected\n";
+            if (fd_sock == listenSocket) {clientSocketIncoming = accept(listenSocket, NULL, NULL);
+                FD_SET(clientSocketIncoming, &masterSet);
+                std::cout << "Client connected" << std::endl;
+                continue;
+            }
 
-            //std::cout << recvBuffer << std::endl;
+            int bytesIn = recv(fd_sock, recvBuffer, sizeof(recvBuffer), 0);
 
-            addUserToQueue(recvBuffer, clientSocketIncoming);
+            if (bytesIn <= 0) {
+                closesocket(fd_sock);
+                FD_CLR(fd_sock, &masterSet);
+                std::cout << "Client disconnected" << std::endl;
+            }
+            else {
+                addUserToQueue(recvBuffer, fd_sock);
+                //recvBuffer[bytesIn] = '\0';
+                std::cout << "Received: " << recvBuffer << std::endl;
+            }
+            
         }
-        /*else {
-            addUserToQueue("", clientSocketIncoming);
-        }*/
+
     }
 }
 

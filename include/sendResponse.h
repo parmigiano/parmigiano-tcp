@@ -12,9 +12,8 @@ using json = nlohmann::json;
 struct SendResponse {
 private:
 public:
-	int sendFile();
-	int sendJSON(json j);
-	//void sendSystemInfo();
+	int sendJSON(json j, std::string responseType);
+	int sendFile(std::string filePath, std::string fileName);
 };
 
 #endif 
