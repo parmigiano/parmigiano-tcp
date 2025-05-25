@@ -7,7 +7,7 @@ class AcceptingResponses {
 private:
 public:
 	std::string acceptingServerResponseJson();
-	std::string acceptingFiles();
+	int acceptingFiles(std::string filePath);
 };
 
 #endif 

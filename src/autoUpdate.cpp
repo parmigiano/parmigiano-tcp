@@ -4,7 +4,7 @@
 #include "../include/sendingRequests.h"
 
 #include "iostream"
-#include <filesystem>
+#include <regex>
 //#include <algorithm>
 #include <fstream> // temp
 #include <vector> // temp
@@ -34,9 +34,10 @@ json AutoUpdate::getHashFromCurrentClientFiles(){
 	for (const auto& entry : fs::recursive_directory_iterator(fs::current_path())) {
 		if (entry.is_regular_file()) {
 			// std::cout << entry.path() << " - " << hash_file(entry.path().string()) << std::endl;
-			actualHashes["fileHashes"][entry.path().filename().string()] = hash_file(entry.path().string());
+			actualHashes["fileHashes"][entry.path().lexically_normal().filename().string()] = hash_file(entry.path().string());
 		}
 	}
+
 	return actualHashes;
 }
 
@@ -54,43 +55,81 @@ int AutoUpdate::downloadFiles(){
 
 	std::cout << filesToDownload << std::endl;
 
-	if (filesToDownload.contains("filesToDownload") && filesToDownload["filesToDownload"].is_object()) {
+	if (!filesToDownload.contains("filesToDownload") && filesToDownload["filesToDownload"].is_object()) {
+		return 1;
+	}
 
-		for (auto& [fileName, hashSum] : filesToDownload["filesToDownload"].items()) {
-			std::cout << "downloadFile: " << fileName << std::endl;
+	std::cout << "downloadFile: " << filesToDownload.dump() << std::endl;
 
-			_sendingRequests.addParameter("filesToDownload", fileName, hashSum.dump());
-			_sendingRequests.confirmRequest("downloadFile");
+	for (auto& [fileName, filePath] : filesToDownload["filesToDownload"].items()) {
+		std::cout << "downloadFile: " << filePath << std::endl;
 
-			// std::string acceptedBytes = _acceptingResponses.acceptingFiles();
-			// recordingFile(acceptedBytes);
+		_sendingRequests.addParameter("filesToDownload", fileName, filePath);
+		_sendingRequests.confirmRequest("downloadFile");
 
-			//_sendingRequests.clearRequest();
+		_sendingRequests.clearRequest();
+
+		//json acceptedJson = json::parse(_acceptingResponses.acceptingServerResponseJson());
+
+		//std::string acceptedBytes = _acceptingResponses.acceptingFiles();
+
+		/*if (std::filesystem::exists(filePath)) {
+			std::filesystem::remove(filePath);
+		}*/
+
+		_acceptingResponses.acceptingFiles(filePath);
+
+		Sleep(1000);
+	}
+
+	//_sendingRequests.confirmRequest("downloadFile");
+	//_sendingRequests.clearRequest();
+
+	return 0;
+}
+
+int AutoUpdate::processAndSaveFile(int fileCreateFlag, std::string filePath, std::string fileName){
+	AcceptingResponses _acceptingResponses;
+
+	//std::string acceptedBytes = _acceptingResponses.acceptingFiles();
+	return 0;
+}
+
+int AutoUpdate::directoriesExist(json actualHashes){
+
+	for (const auto& [directoryName, directorypath] : actualHashes["directoriesPaths"].items()) {
+		if (!std::filesystem::exists(directorypath)) {
+			std::cout << "Created directory: " << directorypath << std::endl;
+			std::filesystem::create_directory(directorypath);
 		}
 	}
-	
-	return 0;
-}
-
-int AutoUpdate::recordingFile(std::string acceptedBytes){
 
 	return 0;
-}
 
+	//std::error_code ec;
+	//std::cout << filePath << std::endl;
+
+	/*if (std::filesystem::exists(filePath)) {
+		return 0;
+	}
+	else {
+		return 1;
+	}*/
+}
 int AutoUpdate::comparisonHash(json clientHashes, json actualHashes){
 
 	for (const auto& [filename, actualHash] : actualHashes["fileHashes"].items()) {
-		if (clientHashes["fileHashes"].contains(filename)) {
+		if (clientHashes["fileHashes"].contains(filename) && std::filesystem::exists(actualHashes["filePaths"][filename])) {
 			if (clientHashes["fileHashes"][filename] != actualHash) {
-				filesToDownload["filesToDownload"][filename] = actualHash; // needs to update
+				filesToDownload["filesToDownload"][filename] = actualHashes["filePaths"][filename]; // needs to update
 			}
 		}
 		else {
-			filesToDownload["filesToDownload"][filename] = actualHash; // needs to install
+			filesToDownload["filesToDownload"][filename] = actualHashes["filePaths"][filename]; // needs to install
 		}
 	}
 
-	std::cout << filesToDownload.dump() << std::endl;
+	//std::cout << filesToDownload.dump() << std::endl;
 
 	return 0;
 }
@@ -104,13 +143,14 @@ int AutoUpdate::checkUpdate(){
 
 	json actualHashes = json::parse(getHashLatestBuildFromServer());
 	json clientHashes = getHashFromCurrentClientFiles();
-
+	 
 	//_sendingRequests.addParameter("filesToDownload", "fileName", "hashSum.dump()");
 	//_sendingRequests.confirmRequest("downloadFile");
 
-    //_connection.disconnectFromCurrentServer();
 
 	comparisonHash(clientHashes, actualHashes);
+
+	directoriesExist(actualHashes);
 
 	if (!filesToDownload.empty()) {
 		std::cout << "(!) needed to update client" << std::endl;
@@ -119,17 +159,22 @@ int AutoUpdate::checkUpdate(){
 
 	if (filesToDownload.empty()) {
 		std::cout << "(!) client has latest version" << std::endl;
+		_connection.disconnectFromCurrentServer();
 		return 0;
 	}
 }
 
 int AutoUpdate::downloadUpdate(){
-	//Connection _connection;
+	Connection _connection;
 
 	//_connection.connectToServer("5462", "localhost");
-	// std::cout << "(!) downloading update" << std::endl;
+	//std::cout << "(!) downloading update" << std::endl;
 
 	downloadFiles();
+	//acceptingFileFromServer();
+
+	_connection.disconnectFromCurrentServer();
+
 
 	return 0;
 }

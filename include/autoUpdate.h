@@ -6,6 +6,7 @@
 #include <string>
 //#include <filesystem> 
 #include <map>
+#include <filesystem>
 
 //namespace fs = std::filesystem;
 
@@ -19,10 +20,11 @@ private:
 	std::size_t hash_file(const std::string& filePath);
 
 	int downloadFiles();
-	int recordingFile(std::string acceptedBytes);
+	int processAndSaveFile(int fileCreateFlag, std::string filePath, std::string fileName);
+	int directoriesExist(json actualHashes);
+	int comparisonHash(json clientHashes, json actualHashes);
 
 public:
-	int comparisonHash(json clientHashes, json actualHashes);
 	int checkUpdate();
 	int downloadUpdate();
 };

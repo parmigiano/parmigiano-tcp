@@ -1,23 +1,23 @@
 #include "../include/acceptingResponses.h"
 #include "../include/connection.h"
 #include "../include/autoUpdate.h"
-#include "../include/serialization.h"
-#include "../include/responseProcessing.h"
+//#include "../include/serialization.h"
+//#include "../include/responseProcessing.h"
 
-#include "../json-develop/single_include/nlohmann/json.hpp"
+//#include "../json-develop/single_include/nlohmann/json.hpp"
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>
 #include <iostream>
-#include <fstream> // temp
 #include <filesystem>
+//#include <queue>
 
-using json = nlohmann::json;
+//using json = nlohmann::json;
 
 std::string AcceptingResponses::acceptingServerResponseJson(){
 	Connection _connection;
-	Serialization _serialization;
-	AutoUpdate _autoUpdate;
+	//Serialization _serialization;
+	//AutoUpdate _autoUpdate;
 
 	SOCKET connectSocket = _connection.getCurrentConnectSocket();
 	char recvBuffer[1024];
@@ -25,19 +25,17 @@ std::string AcceptingResponses::acceptingServerResponseJson(){
 	while (true) {
 		memset(recvBuffer, 0, sizeof(recvBuffer));
 		if (recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0) > 0) {
-			json serverResponse = json::parse(recvBuffer);
+			//json serverResponse = json::parse(recvBuffer);
 
-			std::cout << serverResponse.dump() << std::endl;
+			//std::cout << serverResponse.dump() << std::endl;
 
-			if (serverResponse["responseInfo"]["responseType"] == "actualClientFilesHashes") {
-				return recvBuffer;
-			}
+			return recvBuffer;
 
-			ResponseProcessing _ResponseProcessing;
-			_ResponseProcessing.responseDistribution(recvBuffer);
+			/*ResponseProcessing _ResponseProcessing;
+			_ResponseProcessing.responseDistribution(recvBuffer);*/
 
 			//ofstream file("received_file.exe", ios::app | ios::binary); // write received bytes too temp
-			//file.write(recvBuffer, sizeof(recvBuffer));
+			//file.write(recvBuffer, sizeof(recvBuffer)); 
 			//std::map <std::string, std::string> acceptedData = _serialization.responseStringToMap(_serialization.deserialize(recvBuffer));
 
 			/*for (auto& a : acceptedData) {
@@ -53,28 +51,46 @@ std::string AcceptingResponses::acceptingServerResponseJson(){
 	}
 }
 
-std::string AcceptingResponses::acceptingFiles(){
+int AcceptingResponses::acceptingFiles(std::string filePath){
 	Connection _connection;
-	Serialization _serialization;
-	AutoUpdate _autoUpdate;
+	//Serialization _serialization;
+	//AutoUpdate _autoUpdate;
 
 	SOCKET connectSocket = _connection.getCurrentConnectSocket();
-	char recvBuffer[4096];
+	char recvBuffer[1024];
+	DWORD bytesRead;
+	DWORD writtenBytes;
 
-	while (true) {
-		memset(recvBuffer, 0, sizeof(recvBuffer));
-		if (recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0) > 0) {
+	HANDLE hFile = CreateFileA(
+		filePath.c_str(),
+		GENERIC_WRITE,
+		0,
+		NULL,
+		CREATE_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL
+	);
 
-			return recvBuffer;
-			//ofstream file("received_file.exe", ios::app | ios::binary); // write received bytes too temp
-			//file.write(recvBuffer, sizeof(recvBuffer));
+	if (hFile == INVALID_HANDLE_VALUE) {
+		std::cerr << "Failed to open file handle with error: " << GetLastError() << std::endl;
+		return 1;
+	}
 
-			//_autoUpdate.recordingFiles(_serialization.responseStringToMap());
-			
-			//file.close();
-		}
-		else {
+	while ((bytesRead = recv(connectSocket, recvBuffer, sizeof(recvBuffer), 0)) > 0) {
+		//std::cout << recvBuffer << std::endl;
+
+		if (strcmp(recvBuffer, "end") == 0) {
 			break;
 		}
+
+		if (!WriteFile(hFile, recvBuffer, bytesRead, &writtenBytes, NULL)) {
+			std::cerr << "Accepting file failed with error: " << GetLastError() << std::endl;
+			return 1;
+		}
+		memset(recvBuffer, 0, sizeof(recvBuffer));
 	}
+
+	CloseHandle(hFile);
+
+	return 0;
 }

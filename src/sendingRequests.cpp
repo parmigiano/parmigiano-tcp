@@ -1,6 +1,6 @@
 #include "../include/sendingRequests.h"
 #include "../include/connection.h"
-#include "../include/serialization.h"
+//#include "../include/serialization.h"
 
 #include <WinSock2.h>
 #include <WS2tcpip.h>
@@ -13,7 +13,7 @@ json j;
 
 void SendingRequests::sendRequest(){
 	Connection _connection;
-	Serialization _serialization;
+	//Serialization _serialization;
 
 	SOCKET connectSocket = _connection.getCurrentConnectSocket();
 
