@@ -1,6 +1,7 @@
 #include "../include/requestProcessing.h"
 #include "../include/sendResponse.h"
 #include "../include/autoUpdate.h"
+#include "../include/logger.h"
 #include "../json-develop/single_include/nlohmann/json.hpp"
 
 #include <iostream>
@@ -17,12 +18,12 @@ int requestProcessing::requestDistribution(std::string requestStringJSON){
     // std::cout << j.dump() << std::endl;
 
     if (!j.contains("requestInfo")) {
-        std::cout << "(!) request have not case: requestInfo" << std::endl;
+        _Logger.addLog("PROBLEM", "request have not case: requestInfo", 1);
         return 1;
     }
 
     if (!j["requestInfo"].contains("requestType")) {
-        std::cout << "(!) case: requestInfo, have not key: requestType" << std::endl;
+        _Logger.addLog("PROBLEM", "case: requestInfo, have not key: requestType", 1);
         return 1;
     }
 

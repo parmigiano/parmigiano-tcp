@@ -1,5 +1,6 @@
 #include "../include/sendResponse.h"
 #include "../include/connectionHandler.h"
+#include "../include/logger.h"
 
 #include <mswsock.h>
 #include <regex>
@@ -10,7 +11,7 @@ int SendResponse::sendJSON(json j, std::string responseType){
 	ConnectionHandler _ConnectionHandler;
 
 	if (j.empty()) {
-		std::cout << "(!) json is empty. Sending json response is stopped." << std::endl;
+        _Logger.addLog("INFO", "json is empty. Sending json response is stopped.", 1);
 		return 1;
 	}
 
@@ -18,7 +19,7 @@ int SendResponse::sendJSON(json j, std::string responseType){
 
 	send(_ConnectionHandler.getCurrentConnectClientSocket(), j.dump().c_str(), (int)j.dump().size(), 0);
 
-    std::cout << "(!) Sended: " << j.dump() << std::endl;
+    //std::cout << "(!) Sended: " << j.dump() << std::endl;
 	return 0;
 }
 
@@ -42,18 +43,19 @@ int SendResponse::sendFile(std::string filePath, std::string fileName){
     );
 
     if (hFile == INVALID_HANDLE_VALUE) {
-        std::cerr << "Failed to open file handle with error: " << GetLastError() << std::endl;
+        _Logger.addLog("ERROR", "Failed to open file handle with error: " + GetLastError(), 1);
         return 1;
     }
 
     LARGE_INTEGER fileSize;
     if (!GetFileSizeEx(hFile, &fileSize)) {
-        std::cerr << "Failed to get file size with error: " << GetLastError() << std::endl;
+        _Logger.addLog("ERROR", "Failed to get file size with error: " + GetLastError(), 1);
         CloseHandle(hFile);
         return 1;
     }
 
-    std::cout << "File size: " << fileSize.QuadPart << " bytes" << std::endl;
+    //std::cout << "File size: " << fileSize.QuadPart << " bytes" << std::endl;
+    //_Logger.addLog("INFO", "File size (bytes): " + fileSize.QuadPart, 1);
 
     TRANSMIT_FILE_BUFFERS tfb;
 
@@ -82,7 +84,10 @@ int SendResponse::sendFile(std::string filePath, std::string fileName){
         &tfb,
         0
     )) {
-        std::cerr << "TransmitFile failed with error: " << GetLastError() << std::endl;
+        _Logger.addLog("ERROR", "TransmitFile failed with error: " + GetLastError(), 1);
+    }
+    else {
+        _Logger.addLog("INFO", "File successfully sended: " + filePath, 1);
     }
 
     //std::cout << 2 << std::endl;

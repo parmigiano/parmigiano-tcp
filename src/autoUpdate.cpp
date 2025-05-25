@@ -1,6 +1,7 @@
 #include "../include/autoUpdate.h"
 #include "../include/config.h"
 #include "../include/sendResponse.h"
+#include "../include/logger.h"
 
 #include <fstream>
 #include <mswsock.h>
@@ -67,19 +68,21 @@ int AutoUpdate::parseDirectories(fs::path directory) {
 
 int AutoUpdate::sendRequiredFileHashes(){
     SendResponse _SendResponse;
-    Config _Config;
+    //Config _Config;
 
-    _Config.parseConfig();
+    //_Config.parseConfig();
 
     fs::path directory = _Config.clientFilesPath;
 
+    //std::cout << directory << std::endl;
+
     if (!m_responseJSON.contains("fileHashes")) {
-        std::cout << "(!) json block with fileHashes is empty" << std::endl;
+        _Logger.addLog("PROBLEM", "json block with fileHashes is empty", 1);
         parseFiles(directory, "hash");
     }
 
     if (!m_responseJSON.contains("filePaths")) {
-        std::cout << "(!) json block with filePaths is empty" << std::endl;
+        _Logger.addLog("PROBLEM", "json block with filePaths is empty", 1);
         parseFiles(directory, "paths");
     }
 
@@ -88,29 +91,29 @@ int AutoUpdate::sendRequiredFileHashes(){
 }
 
 int AutoUpdate::collectFilesInfo(){
-    Config _Config;
-    _Config.parseConfig();
+    //Config _Config;
+    //_Config.parseConfig();
 
     fs::path directoryName = _Config.clientFilesPath;
 
     if (!fs::is_directory(directoryName)) {
-        std::cout << "(!) problems with _Config.clientFilesPath" << std::endl;
+        _Logger.addLog("PROBLEM", "problems with _Config.clientFilesPath", 1);
         return 1;
     }
 
     if (parseFiles(directoryName, "hash") == 0) {
-        std::cout << "(!) fileHashes successfully collected" << std::endl;
+        _Logger.addLog("INFO", "fileHashes successfully collected", 1);
     }
 
     if (parseFiles(directoryName, "paths") == 0) {
-        std::cout << "(!) filePaths successfully collected" << std::endl;
+        _Logger.addLog("INFO", "filePaths successfully collected", 1);
     }
 
     if (parseDirectories(directoryName) == 0) {
-        std::cout << "(!) DirectoriesPaths successfully collected" << std::endl;
+        _Logger.addLog("INFO", "DirectoriesPaths successfully collected", 1);
     }
 
-    std::cout << std::endl << m_responseJSON.dump() << std::endl << std::endl;
+    //std::cout << std::endl << m_responseJSON.dump() << std::endl << std::endl;
 
     return 0;
 }

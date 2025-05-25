@@ -1,4 +1,5 @@
 #include "../include/connect.h"
+#include "../include/logger.h"
 
 #include <iostream>
 
@@ -18,7 +19,7 @@ void Connection::createConnection(const char* PORT) {
 	hints.ai_flags = AI_PASSIVE;
 
 	if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-		std::cerr << "(!) WSAStartup error\n";
+		_Logger.addLog("ERROR", "WSAStartup error", 1);
 		WSACleanup();
 	}
 	else if (getaddrinfo(NULL, PORT, &hints, &addrResult) != 0) {
@@ -27,26 +28,27 @@ void Connection::createConnection(const char* PORT) {
 		freeaddrinfo(addrResult);
 	}
 	else if ((listenSocket = socket(addrResult->ai_family, addrResult->ai_socktype, addrResult->ai_protocol)) == INVALID_SOCKET) {
-		std::cerr << "(!) socket error\n";
+		_Logger.addLog("ERROR", "socket error", 1);
 		WSACleanup();
 		freeaddrinfo(addrResult);
 		closesocket(listenSocket);
 	}
 	else if (bind(listenSocket, addrResult->ai_addr, (int)addrResult->ai_addrlen) == SOCKET_ERROR) {
-		std::cerr << "(!) bind error\n";
+		_Logger.addLog("ERROR", "bind error", 1);
 		WSACleanup();
 		freeaddrinfo(addrResult);
 		closesocket(listenSocket);
 	}
 	else if (listen(listenSocket, SOMAXCONN) == SOCKET_ERROR) {
-		std::cerr << "(!) listen error\n";
+		_Logger.addLog("ERROR", "listen error", 1);
 		WSACleanup();
 		freeaddrinfo(addrResult);
 		closesocket(listenSocket);
 	}
 	else {
 		//CH.incomingConnections();
-		std::cout << "Server is started on port: " << PORT << std::endl;
+		std::string port = PORT;
+		_Logger.addLog("INFO", "Server is started on port: " + port, 1);
 	}
 
 	

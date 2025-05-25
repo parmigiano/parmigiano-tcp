@@ -12,7 +12,10 @@ private:
 public:
     short int serverPort = 0;
     std::string clientFilesPath = "";
+    std::string logDir = "";
     int parseConfig();
 };
+
+extern Config _Config;
 
 #endif 

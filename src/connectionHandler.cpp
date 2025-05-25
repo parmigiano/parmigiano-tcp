@@ -2,6 +2,7 @@
 #include "../include/UsersQueue.h"
 #include "../include/connect.h"
 #include "../include/requestProcessing.h"
+#include "../include/logger.h"
 
 #include <iostream>
 #include <mutex>
@@ -10,14 +11,14 @@ SOCKET clientSocket = INVALID_SOCKET;
 
 void ConnectionHandler::addUserToQueue(string request, SOCKET socket){
     mutex addUserToQueueMutex;
-    std::cout << "addUserToQueue\n";
+    //_Logger.addLog("INFO", "Add user to queue", 1);
 
     unique_lock<mutex> lock(addUserToQueueMutex);
     connectionQueue.push_back({ request, socket });
     lock.unlock();
 
     if (connectionQueue.empty()) {
-        std::cout << "connectionQueue empty\n";
+        _Logger.addLog("PROBLEM", "connection queue is empty", 1);
     }
 }
 
@@ -26,7 +27,7 @@ void ConnectionHandler::queueHandler(){
 
     mutex queueMutex;
 
-    std::cout << "queueHandler\n";
+    //std::cout << "queueHandler\n";
 
     while (true) {
         if (connectionQueue.empty()) {
@@ -65,13 +66,13 @@ void ConnectionHandler::incomingConnections(){
         fd_set copySet = masterSet;
         timeval timeout;
 
-        timeout.tv_sec = 10;
+        timeout.tv_sec = 60;
         timeout.tv_usec = 0;
 
         socketCount = select(0, &copySet, nullptr, nullptr, &timeout);
 
         if (socketCount == 0) {
-            std::cout << "Timeout: haven't new connections" << std::endl;
+            _Logger.addLog("INFO", "Timeout: haven't new connections", 1);
             continue;
         }
 
@@ -82,7 +83,7 @@ void ConnectionHandler::incomingConnections(){
 
             if (fd_sock == listenSocket) {clientSocketIncoming = accept(listenSocket, NULL, NULL);
                 FD_SET(clientSocketIncoming, &masterSet);
-                std::cout << "Client connected" << std::endl;
+                //std::cout << "Client connected" << std::endl;
                 continue;
             }
 
@@ -91,12 +92,12 @@ void ConnectionHandler::incomingConnections(){
             if (bytesIn <= 0) {
                 closesocket(fd_sock);
                 FD_CLR(fd_sock, &masterSet);
-                std::cout << "Client disconnected" << std::endl;
+                //std::cout << "Client disconnected" << std::endl;
             }
             else {
                 addUserToQueue(recvBuffer, fd_sock);
                 //recvBuffer[bytesIn] = '\0';
-                std::cout << "Received: " << recvBuffer << std::endl;
+                //std::cout << "Received: " << recvBuffer << std::endl;
             }
             
         }

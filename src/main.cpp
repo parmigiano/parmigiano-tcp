@@ -3,6 +3,7 @@
 #include "../include/connect.h"
 #include "../include/connectionHandler.h"
 #include "../include/autoUpdate.h"
+#include "../include/logger.h"
 
 #include <iostream>
 #include <map>
@@ -20,7 +21,7 @@ int main() {
 }
 
 void appControl::startApp() {
-	Config _Config;
+	//Config _Config;
 	Connection _Connection;
 	ConnectionHandler _ConnectionHandler;
 	AutoUpdate _AutoUpdate;
@@ -30,7 +31,11 @@ void appControl::startApp() {
 	//_AutoUpdate.getRequiredFileHashes
 	
 	_Config.parseConfig();
+	_Logger.initializeLogger();
+
 	_Connection.createConnection(std::to_string(_Config.serverPort).c_str());
+
+	//_Logger.addLog("INFO", "server is started");
 
 	_AutoUpdate.collectFilesInfo();
 
