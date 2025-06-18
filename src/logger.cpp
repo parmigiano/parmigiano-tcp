@@ -1,11 +1,26 @@
 #include "../include/logger.h"
-#include "../include/config.h"
 
 #include "filesystem"
 #include "fstream"
 #include <chrono>
 
-Logger _Logger;
+Logger* Logger::instance_ptr = nullptr;
+std::mutex Logger::mtx;
+
+//Logger _Logger;
+
+Logger::Logger(){
+	_Config = Config::get_instance();
+}
+
+Logger* Logger::get_instance(){
+	std::lock_guard<std::mutex> lock(mtx);
+	if (instance_ptr == nullptr) {
+		instance_ptr = new Logger();
+	}
+
+	return instance_ptr;
+}
 
 std::string Logger::getActualTime(){
 	std::ostringstream oss;
@@ -24,11 +39,9 @@ std::string Logger::getActualTime(){
 }
 
 int Logger::logFilesExist(){
-	//Config _Config;
-
 	std::ofstream file;
 
-	file.open(_Config.logDir + "\\latest.txt", std::ios::out);
+	file.open(_Config->logDir + "\\latest.txt", std::ios::out);
 	//file.open(_Config.logDir + "\\currently.txt", std::ios::app);
 
 	file.close();
@@ -36,11 +49,9 @@ int Logger::logFilesExist(){
 }
 
 int Logger::checkLogDirectoryExist(){
-	//Config _Config;
-
-	if (!std::filesystem::exists(_Config.logDir)) {
+	if (!std::filesystem::exists(_Config->logDir)) {
 		// std::cout << "Created directory: " << _Config.logDir << std::endl;
-		std::filesystem::create_directory(_Config.logDir);
+		std::filesystem::create_directory(_Config->logDir);
 	}
 
 	return 0;
@@ -49,7 +60,7 @@ int Logger::checkLogDirectoryExist(){
 int Logger::fileLog(std::string logType, std::string log){
 	std::fstream file;
 
-	file.open(_Config.logDir + "\\latest.txt", std::ios::app);
+	file.open(_Config->logDir + "\\latest.txt", std::ios::app);
 
 	file << "[" << logType << "] " << getActualTime() << " " << log << std::endl;
 
@@ -68,18 +79,24 @@ int Logger::initializeLogger(){
 	checkLogDirectoryExist();
 	logFilesExist();
 
+	//thread(&ConnectionHandler::queueHandler, this).detach();
+
 	return 0;
 }
 
 int Logger::addLog(std::string logType, std::string log, int loggingFlag){
 	if (loggingFlag == 0) {
 		fileLog(logType, log);
-
 	}
 
 	if (loggingFlag == 1) {
+		consoleLog(logType, log);
+	}
+
+	if (loggingFlag == 2) {
 		fileLog(logType, log);
 		consoleLog(logType, log);
 	}
+
 	return 0;
 }

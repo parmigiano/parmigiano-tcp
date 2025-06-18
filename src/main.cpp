@@ -1,9 +1,8 @@
 #include "../include/main.h"
-#include "../include/config.h"
+
+#include "../include/autoUpdate.h"
 #include "../include/connect.h"
 #include "../include/connectionHandler.h"
-#include "../include/autoUpdate.h"
-#include "../include/logger.h"
 
 #include <iostream>
 #include <map>
@@ -11,35 +10,49 @@
 
 int main() {
 	setlocale(LC_ALL, "ru");
-	appControl _appControl;
+	AppControl* _appControl = new AppControl();
 
-	_appControl.startApp();
+	_appControl->startApp();
+
+	delete _appControl;
 
 	system("pause");
 
 	return 0;
 }
 
-void appControl::startApp() {
-	//Config _Config;
-	Connection _Connection;
-	ConnectionHandler _ConnectionHandler;
-	AutoUpdate _AutoUpdate;
+AppControl::AppControl(){
+	_Logger = Logger::get_instance();
+	_Config = Config::get_instance();
 
-	//_AutoUpdate;
+	_AutoUpdate = std::make_shared<AutoUpdate>();
+	_Connection = std::make_shared<Connection>();
+	_ConnectionHandler = std::make_shared<ConnectionHandler>();
+}
 
-	//_AutoUpdate.getRequiredFileHashes
-	
-	_Config.parseConfig();
-	_Logger.initializeLogger();
+int AppControl::startApp() {
+	short int configLoadResult = _Config->parseConfig();
+	_Logger->initializeLogger();
 
-	_Connection.createConnection(std::to_string(_Config.serverPort).c_str());
+	if (configLoadResult > 0) {
+		_Logger->addLog("WARN", "Probmlem with config file: \"config.txt\"", 2);
+		_Logger->addLog("WARN", "Configure it for succesfull start server", 2);
 
-	//_Logger.addLog("INFO", "server is started");
+		return 1;
+	}
 
-	_AutoUpdate.collectFilesInfo();
+	_Logger->addLog("INFO", "Starting server...", 2);
 
-	thread(&ConnectionHandler::queueHandler, &_ConnectionHandler).detach();
+	_Connection->createConnection(std::to_string(_Config->serverPort).c_str());
 
-	_ConnectionHandler.incomingConnections();
+	_AutoUpdate->collectFilesInfo();
+	_AutoUpdate->initializeLatestBuildInfo();
+
+	std::thread(&ConnectionHandler::queueHandler, _ConnectionHandler.get()).detach();
+
+	_ConnectionHandler->incomingConnections();
+
+	delete _Config;
+
+	return 0;
 }

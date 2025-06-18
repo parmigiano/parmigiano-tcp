@@ -1,3 +1,3 @@
 serverPort=5462
-clientFilesPath=latestClientBuild
+lastClientBuildDir=./latestClientBuild
 logDir=./log

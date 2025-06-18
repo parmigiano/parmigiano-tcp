@@ -1,60 +1,91 @@
 #include "../include/connectionHandler.h"
-#include "../include/UsersQueue.h"
 #include "../include/connect.h"
 #include "../include/requestProcessing.h"
-#include "../include/logger.h"
+//#include "../include/UsersQueue.h"
 
 #include <iostream>
+#include <queue>
+#include <utility>
 #include <mutex>
 
-SOCKET clientSocket = INVALID_SOCKET;
+//ConnectionHandler _ConnectionHandler;
+//RequestProcessing _requestProcessing;
+//Connection _Connection;
 
-void ConnectionHandler::addUserToQueue(string request, SOCKET socket){
-    mutex addUserToQueueMutex;
+std::mutex queueMutex;
+
+SOCKET clientSocket = INVALID_SOCKET;
+std::queue<std::pair<std::string, SOCKET>> usersQueue;
+
+ConnectionHandler::ConnectionHandler(){
+    _Logger = Logger::get_instance();
+
+    _RequestProcessing = std::make_shared<RequestProcessing>();
+    _Connection = std::make_shared <Connection>();
+}
+
+//ConnectionHandler::~ConnectionHandler(){
+//    delete _Logger;
+//
+//    if (_RequestProcessing != nullptr) delete _RequestProcessing;
+//    if (_Connection != nullptr) delete _Connection;
+//}
+
+void ConnectionHandler::addUserToQueue(std::string request, SOCKET socket){
+    //mutex addUserToQueueMutex;
     //_Logger.addLog("INFO", "Add user to queue", 1);
 
-    unique_lock<mutex> lock(addUserToQueueMutex);
-    connectionQueue.push_back({ request, socket });
-    lock.unlock();
+    std::lock_guard<std::mutex> lock(queueMutex);
+    usersQueue.push({ request, socket });
 
-    if (connectionQueue.empty()) {
-        _Logger.addLog("PROBLEM", "connection queue is empty", 1);
-    }
+    /*if (connectionQueue.empty()) {
+        _Logger.addLog("PROBLEM", "connection queue is empty", 2);
+    }*/
 }
 
 void ConnectionHandler::queueHandler(){
-    requestProcessing _requestProcessing;
-
-    mutex queueMutex;
-
     //std::cout << "queueHandler\n";
 
     while (true) {
-        if (connectionQueue.empty()) {
+        //if (connectionQueue.empty()) {
+        //    continue;
+        //}
+
+        //unique_lock<mutex> lock(queueMutex);
+        //usQu::iterator it = connectionQueue.begin();
+
+        //while (it != connectionQueue.end()) {  // replace to STL queue
+        //    //std::cout << it->clientSocket << std::endl << it->request << std::endl;
+        //    clientSocket = it->clientSocket;
+        //    _requestProcessing.requestDistribution(it->request); //
+        //    it = connectionQueue.erase(it);
+
+        //    // std::cout << "Received: " << it->request << std::endl;
+        //}
+
+        //lock.unlock();
+
+        if (usersQueue.empty()) {
             continue;
         }
 
-        unique_lock<mutex> lock(queueMutex);
-        usQu::iterator it = connectionQueue.begin();
+        std::lock_guard<std::mutex> lock(queueMutex);
 
-        while (it != connectionQueue.end()) {  // replace to STL queue
-            //std::cout << it->clientSocket << std::endl << it->request << std::endl;
-            clientSocket = it->clientSocket;
-            _requestProcessing.requestDistribution(it->request); //
-            it = connectionQueue.erase(it);
+        std::pair<std::string, SOCKET> front = usersQueue.front();
 
-            // std::cout << "Received: " << it->request << std::endl;
-        }
+        //std::cout << front.first << std::endl;
+        //std::cout << front << std::endl;
 
-        lock.unlock();
+        clientSocket = front.second;
+        _RequestProcessing->requestDistribution(front.first, front.second);
+        
+        usersQueue.pop();
     }
 }
 
 void ConnectionHandler::incomingConnections(){
-    Connection _Connection;
-
-    SOCKET listenSocket = _Connection.getListenSocket();
-    fd_set masterSet = _Connection.getMasterSet();
+    SOCKET listenSocket = _Connection->getListenSocket();
+    fd_set masterSet = _Connection->getMasterSet();
     SOCKET clientSocketIncoming = INVALID_SOCKET;
 
     int socketCount = 0;
@@ -72,7 +103,7 @@ void ConnectionHandler::incomingConnections(){
         socketCount = select(0, &copySet, nullptr, nullptr, &timeout);
 
         if (socketCount == 0) {
-            _Logger.addLog("INFO", "Timeout: haven't new connections", 1);
+            _Logger->addLog("INFO", "Timeout: haven't new connections", 2);
             continue;
         }
 
@@ -83,7 +114,7 @@ void ConnectionHandler::incomingConnections(){
 
             if (fd_sock == listenSocket) {clientSocketIncoming = accept(listenSocket, NULL, NULL);
                 FD_SET(clientSocketIncoming, &masterSet);
-                //std::cout << "Client connected" << std::endl;
+                _Logger->addLog("INFO", "Client connected", 2);
                 continue;
             }
 
@@ -92,7 +123,7 @@ void ConnectionHandler::incomingConnections(){
             if (bytesIn <= 0) {
                 closesocket(fd_sock);
                 FD_CLR(fd_sock, &masterSet);
-                //std::cout << "Client disconnected" << std::endl;
+                _Logger->addLog("INFO", "Client disconnected", 2);
             }
             else {
                 addUserToQueue(recvBuffer, fd_sock);

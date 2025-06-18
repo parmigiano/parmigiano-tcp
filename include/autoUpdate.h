@@ -4,21 +4,37 @@
 #include <string>
 #include <filesystem>
 #include <WinSock2.h>
+//#include <memory>
 
 #include "../json-develop/single_include/nlohmann/json.hpp"
+#include "../include/config.h"
+#include "../include/logger.h"
 
+//class SendResponse;
 
-namespace fs = std::filesystem;
+//class SendResponse;
+
 using json = nlohmann::json;
 
-class AutoUpdate {
+class AutoUpdate { 
 private:
+	Config* _Config;
+	Logger* _Logger;
+
+	//SendResponse* _SendResponse = nullptr;
+	//std::shared_ptr<SendResponse> _SendResponse;
+
 	std::size_t hash_file(const std::string& filePath);
-	int parseFiles(fs::path directory, std::string parsingType);
-	int parseDirectories(fs::path directory);
+	int parseFiles(std::filesystem::path directory, std::string parsingType);
+	int parseDirectories(std::filesystem::path directory);
 public:
-	int sendRequiredFileHashes();
+	AutoUpdate();
+	~AutoUpdate() = default;
+
+	int initializeLatestBuildInfo();
 	int collectFilesInfo();
 };
+
+//extern AutoUpdate _AutoUpdate;
 
 #endif 
