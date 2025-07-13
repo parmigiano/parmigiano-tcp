@@ -6,75 +6,121 @@
 #include <WS2tcpip.h>
 #include <iostream>
 
-#include "../json-develop/single_include/nlohmann/json.hpp"
+//SendingRequests _SendingRequests;
 
-using json = nlohmann::json;
-json j;
+//using json = nlohmann::json;
+
+SendingRequests::SendingRequests(){
+	_Connection = std::make_shared<Connection>();
+	_Request = std::make_shared<RequestStruct::Request>();
+
+	GOOGLE_PROTOBUF_VERIFY_VERSION;
+}
+
+SendingRequests::~SendingRequests(){
+	google::protobuf::ShutdownProtobufLibrary();
+}
 
 void SendingRequests::sendRequest(){
-	Connection _connection;
-	//Serialization _serialization;
+	std::string data;
 
-	SOCKET connectSocket = _connection.getCurrentConnectSocket();
+	if (!_Request->SerializeToString(&data)) {
+		std::cerr << "Filed to serialize request"<< std::endl;
+	}
 
-	// std::cout << _serialization.requestStructToJson(requestData) << std::endl;
-	
-	send(connectSocket, j.dump().c_str(), (int)j.dump().size(), 0);
+	//for (int i = 0; i < _Request->filesinfo_size(); i++) {
+	//	const RequestStruct::FilesInfo& fileInfoActual = _Request->filesinfo(i);
+
+	//	std::cout << fileInfoActual.hash() << std::endl; //tmp
+
+	//	std::cout << fileInfoActual.name() << std::endl; //tmp
+
+	//	std::cout << fileInfoActual.path() << std::endl; //tmp
+	//}
+
+	//const RequestStruct::RequestInfo& reqInfo = _Request->requestinfo();
+
+	/*switch (reqInfo.type()) {
+	case RequestStruct::RequestInfo::fileHashRequest:
+		std::cout << "request type: fileHashRequest";
+		break;
+	case RequestStruct::RequestInfo::downloadFile:
+		std::cout << "request type: downloadFile";
+		break;
+	case RequestStruct::RequestInfo::unknown:
+		std::cout << "unknown type";
+		break;
+	}*/
+
+	if (_Request->requestinfo().type() == RequestStruct::RequestInfo::unknown) {
+		std::cerr << "Request will not sending with type requestInfo->requestType: unknown" << std::endl;
+		return;
+	}
+
+	if (send(_Connection->getCurrentConnectSocket(), data.c_str(), (int)data.size(), 0) == SOCKET_ERROR) {
+		std::cerr << "Send failed ith error: " << WSAGetLastError() << std::endl;
+	}
+
+	clearRequest();
 }
 
 int SendingRequests::clearRequest(){
-	j.clear();
-	return 0;
-}
-
-int SendingRequests::addParameter(std::string parameterCaseName, std::string parameterKey, std::string parameterValue){
-
-	/*if (!j.contains(parameterCaseName)) {
-		std::cout << "(!) Case not found. Case is created. Data is added to case" << std::endl;
-		j[parameterCaseName][parameterKey] = parameterValue;
-	}*/
-	if (!parameterCaseName.empty() && !parameterKey.empty() && !parameterValue.empty()) {
-		j[parameterCaseName][parameterKey] = parameterValue;
-	}
-
-	/*if (requestData.find(parameterCaseName) == requestData.end()) {
-		std::cout << "(!) Case not found. Case is created. Data is added to case" << std::endl;
-		requestData[parameterCaseName][parameterKey] = parameterValue;
-	} else {
-
-		if (requestData[parameterCaseName].find(parameterKey) == requestData[parameterCaseName].end()) {
-			requestData[parameterCaseName][parameterKey] = parameterValue;
-		} else {
-			requestData[parameterCaseName][parameterKey].insert(requestData[parameterCaseName][parameterKey].end(), parameterValue.begin(), parameterValue.end());
-		}
-
-	}*/
-
-	/*for (const auto& outerPair : requestData) {
-		std::cout << "Outer Key: " << outerPair.first << std::endl;
-		for (const auto& innerPair : outerPair.second) {
-			std::cout << "  Inner Key: " << innerPair.first << ", Value: " << innerPair.second << std::endl;
-		}
-	}*/
+	_Request->Clear();
 
 	return 0;
 }
 
-int SendingRequests::addParameter(std::string parameterCaseName, std::map<std::string, std::string> transmittedRequestData){
+int SendingRequests::addFileInfoToRequest(std::string fileName, std::string filePath, std::string fileHash){
+	auto* fileInfo = _Request->add_filesinfo();
 
-	for (const auto& a : transmittedRequestData) {
-		addParameter(parameterCaseName, a.first, a.second);
+	fileInfo->set_name(fileName);
+	fileInfo->set_path(filePath);
+
+	if (!fileHash.empty()) {
+		fileInfo->set_hash(fileHash);
 	}
+
+	return 0;
+}
+
+int SendingRequests::setRequestInfo(std::string requestType){
+	if (requestType == "fileHashRequest") {
+		_Request->mutable_requestinfo()->set_type(RequestStruct::RequestInfo::fileHashRequest);
+	}
+	else if (requestType == "downloadFile") {
+		_Request->mutable_requestinfo()->set_type(RequestStruct::RequestInfo::downloadFile);
+	}
+	else {
+		std::cerr << "incorrect request type" << std::endl;
+		return 1;
+	}
+
+	return 0;
+}
+
+int SendingRequests::addDataToRequest(std::string key, std::string value){
+	auto* requestData = _Request->add_requestdata();
+
+	requestData->set_key(key);
+	requestData->set_value(value);
 
 	return 0;
 }
 
 int SendingRequests::confirmRequest(std::string requestType){
-	if (j.empty()) {
-		std::cout << "(!) sended request with ONLY requestInfo:requestType!" << std::endl;
+	/*if (!_Request->IsInitialized()) {
+		std::cout << "(!) sended request with ONLY requestInfo->requestType: " << requestType << std::endl;
+	}*/
+
+	if (_Request->ByteSizeLong() == 0) {
+		std::cout << "(!) sended request with ONLY requestInfo->requestType: " << requestType << std::endl;
 	}
 
-	addParameter("requestInfo", "requestType", requestType);
+	//_Request->add_filesinfo()->set_hash("1");
+	//_Request->add_filesinfo()->set_name("2");
+	//_Request->add_filesinfo()->set_path("3");
+
+	setRequestInfo(requestType);
 	sendRequest();
 
 	return 0;

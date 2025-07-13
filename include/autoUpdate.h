@@ -1,32 +1,44 @@
 #ifndef AUTOUPDATE_H
 #define AUTOUPDATE_H
 
-#include "../json-develop/single_include/nlohmann/json.hpp"
+//#include "../json-develop/single_include/nlohmann/json.hpp"
+//#include "../include/RequestStruct.pb.h"
+#include "../include/ResponseStruct.pb.h"
 
 #include <string>
 //#include <filesystem> 
 #include <map>
 #include <filesystem>
+#include <memory>
 
-//namespace fs = std::filesystem;
-
-using json = nlohmann::json;
+class AcceptingResponses;
+class SendingRequests;
+class Connection;
 
 class AutoUpdate {
 private:
+	std::shared_ptr<AcceptingResponses> _AcceptingResponses;
+	std::shared_ptr<SendingRequests> _SendingRequests;
+	std::shared_ptr<Connection> _Connection;
+	//std::shared_ptr<RequestStruct::Request> _Request;
+
 	std::string getHashLatestBuildFromServer();
-	json getHashFromCurrentClientFiles();
+	// RequestStruct::Request getHashFromCurrentClientFiles(RequestStruct::Request actualFilesInfo);
 
 	std::size_t hash_file(const std::string& filePath);
 
 	int downloadFiles();
-	int processAndSaveFile(int fileCreateFlag, std::string filePath, std::string fileName);
-	int directoriesExist(json actualHashes);
-	int comparisonHash(json clientHashes, json actualHashes);
+	int directoriesExist(ResponseStruct::Response actualFilesInfo);
+	int comparisonHash(ResponseStruct::Response actualFilesInfo);
 
 public:
+	AutoUpdate();
+	~AutoUpdate();
+
 	int checkUpdate();
 	int downloadUpdate();
 };
+
+//extern AutoUpdate _AutoUpdate;
 
 #endif 

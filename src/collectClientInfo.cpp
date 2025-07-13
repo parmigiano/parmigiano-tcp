@@ -1,5 +1,7 @@
 #include "../include/collectClientInfo.h"
 
+//CollectClientInfo _CollectClientInfo;
+
 void CollectClientInfo::getOSversion(){
 
 }

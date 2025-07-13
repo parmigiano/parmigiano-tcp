@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package RequestStruct;
+
+message FileInfo{
+	string fileName = 1;
+	string filePath = 2;
+	string fileHash = 3;
+}
+
+message FieldOfRequestData {
+	string key = 1;
+	string value = 2;
+}
+
+message RequestInfo {
+	enum requestTypes{
+		unknown = 0;
+		fileHashRequest = 1;
+		downloadFile = 2;
+	}
+
+	requestTypes type = 1;
+}
+
+// MAIN
+message Request {
+	// PERMANENT NECESSARY FIELDS
+	RequestInfo _requestInfo = 1; // important field of request info
+	repeated FieldOfRequestData _requestData = 2; // main field/s of data
+
+	// OPTIONAL UPDATE FIELDS
+	repeated FilesInfo _filesInfo = 3; // usage while checking update and updating
+}

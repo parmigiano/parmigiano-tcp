@@ -14,8 +14,12 @@ private:
 	void getOSversion();
 	void getRegion();
 public:
+	~CollectClientInfo() = default;
+
 	void collectSystemInfo();
 	void setClientAppInfo(std::string _appVersion, std::string _UID);
 };
+
+//extern CollectClientInfo _CollectClientInfo;
 
 #endif 

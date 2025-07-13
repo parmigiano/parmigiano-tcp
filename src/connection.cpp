@@ -2,14 +2,14 @@
 
 #include <iostream>
 
+//Connection _Connection;
+
 SOCKET connectSocket = INVALID_SOCKET;
-//const char* IPADDRESS = "localhost";
 
 void Connection::createConnect(const char* PORT, const char* IPADDRESS){
 	WSADATA wsaData;
 	ADDRINFO hints;
 	ADDRINFO* addrResult = NULL;
-	//SOCKET clientSocket = INVALID_SOCKET;
 
 	ZeroMemory(&hints, sizeof(hints));
 	hints.ai_family = AF_INET;
@@ -43,8 +43,6 @@ void Connection::createConnect(const char* PORT, const char* IPADDRESS){
 	}
 	else {
 		std::cout << "(!) successful connect :)" << std::endl;
-		/*while (true) {
-		}*/
 	}
 }
 

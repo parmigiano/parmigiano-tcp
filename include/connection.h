@@ -14,9 +14,13 @@ private:
 	void createConnect(const char* PORT, const char* IPADDRESS);
 	void tryConnectAgain(const char* PORT, const char* IPADDRESS);
 public:
+	~Connection() = default;
+
 	int connectToServer(const char* PORT, const char* IPADDRESS);
 	int disconnectFromCurrentServer();
 	SOCKET getCurrentConnectSocket();
 };
+
+//extern Connection _Connection;
 
 #endif 
