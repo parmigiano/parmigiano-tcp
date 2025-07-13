@@ -47,23 +47,6 @@ void ConnectionHandler::queueHandler(){
     //std::cout << "queueHandler\n";
 
     while (true) {
-        //if (connectionQueue.empty()) {
-        //    continue;
-        //}
-
-        //unique_lock<mutex> lock(queueMutex);
-        //usQu::iterator it = connectionQueue.begin();
-
-        //while (it != connectionQueue.end()) {  // replace to STL queue
-        //    //std::cout << it->clientSocket << std::endl << it->request << std::endl;
-        //    clientSocket = it->clientSocket;
-        //    _requestProcessing.requestDistribution(it->request); //
-        //    it = connectionQueue.erase(it);
-
-        //    // std::cout << "Received: " << it->request << std::endl;
-        //}
-
-        //lock.unlock();
 
         if (usersQueue.empty()) {
             continue;
@@ -72,9 +55,6 @@ void ConnectionHandler::queueHandler(){
         std::lock_guard<std::mutex> lock(queueMutex);
 
         std::pair<std::string, SOCKET> front = usersQueue.front();
-
-        //std::cout << front.first << std::endl;
-        //std::cout << front << std::endl;
 
         clientSocket = front.second;
         _RequestProcessing->requestDistribution(front.first, front.second);
@@ -127,8 +107,10 @@ void ConnectionHandler::incomingConnections(){
             }
             else {
                 addUserToQueue(recvBuffer, fd_sock);
-                //recvBuffer[bytesIn] = '\0';
-                //std::cout << "Received: " << recvBuffer << std::endl;
+
+
+                /*recvBuffer[bytesIn] = '\0';
+                std::cout << "Received: " << recvBuffer << " " << sizeof(recvBuffer) << std::endl;*/
             }
             
         }

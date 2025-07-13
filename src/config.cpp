@@ -40,7 +40,7 @@ void Config::assigningValues(std::string key, std::string value){
         serverPort = std::stoi(value);
     }
     else if (key == "lastClientBuildDir") {
-        lastClientBuildDir = value;
+        buildDir = value;
     } 
     else if (key == "logDir") {
         logDir = value;

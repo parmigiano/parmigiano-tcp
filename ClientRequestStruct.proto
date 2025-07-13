@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package ClientRequestStruct;
+
+message LastBuildInfo{
+	string fileName = 1;
+	string filePath = 2;
+	string fileHash = 3;
+	string dirPath = 4;
+}
+
+message FieldOfRequestData {
+	string key = 1;
+	string value = 2;
+}
+
+message RequestInfo {
+	enum requestTypes{
+		unknown = 0;
+		fileHashRequest = 1;
+		downloadFile = 2;
+	}
+
+	requestTypes type = 1;
+}
+
+message Request {
+	RequestInfo requestInfo = 1; // important field of request info
+	repeated FieldOfRequestData requestData = 2; // main field/s of data
+	repeated FilesInfo filesInfo = 3; // usage on checking update and update
+}

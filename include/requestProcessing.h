@@ -9,6 +9,7 @@
 #include "../include/logger.h"
 //#include "../include/sendResponse.h"
 //#include "../include/autoUpdate.h"
+#include "../include/ClientRequestStruct.pb.h"
 
 //class AutoUpdate;
 class SendResponse;

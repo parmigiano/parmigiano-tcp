@@ -46,7 +46,7 @@ int AppControl::startApp() {
 	_Connection->createConnection(std::to_string(_Config->serverPort).c_str());
 
 	_AutoUpdate->collectFilesInfo();
-	_AutoUpdate->initializeLatestBuildInfo();
+	//_AutoUpdate->initializeLatestBuildInfo();
 
 	std::thread(&ConnectionHandler::queueHandler, _ConnectionHandler.get()).detach();
 

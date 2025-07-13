@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package ResponseStruct;
+
+message FileInfo{
+	string fileName = 1;
+	string filePath = 2;
+	string fileHash = 3;
+}
+
+message DirInfo{
+	string dirPath = 1;
+}
+
+message ResponseInfo {
+	enum responseTypes{
+		unknown = 0;
+		filesHashes = 1;
+		downloadFile = 2;
+	}
+
+	responseTypes type = 1;
+}
+
+// MAIN
+message Response {
+	// PERMANENT NECESSARY FIELDS
+	ResponseInfo responseInfo = 1; // important field of request info
+
+	// OPTIONAL UPDATE FIELDS
+	// usage while checking update and updating
+	repeated FileInfo fileInfo = 2; 
+	repeated DirInfo dirInfo = 3; 
+}

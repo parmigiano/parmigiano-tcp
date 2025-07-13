@@ -4,9 +4,19 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <list>
 #include <mutex>
 
-#include "../json-develop/single_include/nlohmann/json.hpp"
+class FileInfoFields {
+public:
+    std::string fileName;
+    std::string filePath;
+    std::string fileHash;
+
+    FileInfoFields(std::string name, std::string path, std::string hash) : fileName(name), filePath(path), fileHash(hash) {};
+};
+
+typedef std::list<FileInfoFields> _FileInfoFields;
 
 struct Config {
 private:
@@ -16,7 +26,7 @@ private:
     Config(){}
 
     int isFile();
-    void assigningValues(std::string key, std::string svalue);
+    void assigningValues(std::string key, std::string value);
 public:
     Config(const Config&) = delete;
     ~Config();
@@ -24,9 +34,13 @@ public:
     static Config* get_instance();
 
     short int serverPort = 0;
-    std::string lastClientBuildDir = "";
+    std::string buildDir = "";
     std::string logDir = "";
-    nlohmann::json latestBuildInfo;
+    //nlohmann::json latestBuildInfo;
+
+    _FileInfoFields buildFilesInfo;
+    std::list <std::string> buildDirsInfo;
+
     int parseConfig();
 };
 

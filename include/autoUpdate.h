@@ -2,19 +2,17 @@
 #define AUTOUPDATE_H
 
 #include <string>
+#include <map>
 #include <filesystem>
 #include <WinSock2.h>
 //#include <memory>
 
-#include "../json-develop/single_include/nlohmann/json.hpp"
 #include "../include/config.h"
 #include "../include/logger.h"
 
 //class SendResponse;
 
-//class SendResponse;
-
-using json = nlohmann::json;
+//class SendResponse
 
 class AutoUpdate { 
 private:
@@ -31,7 +29,7 @@ public:
 	AutoUpdate();
 	~AutoUpdate() = default;
 
-	int initializeLatestBuildInfo();
+	// int initializeLatestBuildInfo();
 	int collectFilesInfo();
 };
 

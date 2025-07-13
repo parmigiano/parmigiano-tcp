@@ -1,10 +1,10 @@
 #ifndef SENDRESPONSE_H
 #define SENDRESPONSE_H
 
-#include "../json-develop/single_include/nlohmann/json.hpp"
 #include "../include/logger.h"
 #include "../include/config.h"
 //#include "../include/connectionHandler.h"
+#include "../include/ClientRequestStruct.pb.h"
 
 #include <string>
 #include <iostream>
@@ -14,12 +14,14 @@
 
 //class ConnectionHandler;
 
-using json = nlohmann::json;
+#include "../include/ResponseStruct.pb.h"
 
 class SendResponse {
 private:
 	Logger* _Logger;
 	Config* _Config;
+
+	std::shared_ptr<ResponseStruct::Response> _Response;
 
 	//ConnectionHandler* _ConnectionHandler = nullptr;
 
@@ -29,7 +31,12 @@ public:
 	SendResponse();
 	~SendResponse() = default;
 
-	int sendJSON(json j, std::string responseType, SOCKET clientSocket);
+	void setReponseType(std::string responseType);
+	void addFileInfo(std::string hash, std::string path, std::string name);
+	void addDirInfo(std::string dirPath);
+	void clearResponse();
+
+	int sendResponse(SOCKET clientSocket);
 	int sendFile(std::string filePath, std::string fileName, SOCKET clientSocket);
 };
 

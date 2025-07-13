@@ -1,16 +1,6 @@
 #include "../include/requestProcessing.h"
 
-#include "../json-develop/single_include/nlohmann/json.hpp"
-
 #include "../include/sendResponse.h"
-//#include "../include/autoUpdate.h"
-
-//#include <iostream>
-
-//RequestProcessing _requestProcessing;
-//AutoUpdate _AutoUpdate;
-//SendResponse _SendResponse;
-//using json = nlohmann::json;
 
 RequestProcessing::RequestProcessing(){
     _Logger = Logger::get_instance();
@@ -19,38 +9,40 @@ RequestProcessing::RequestProcessing(){
     _SendResponse = std::make_shared<SendResponse>();
 }
 
-//RequestProcessing::~RequestProcessing(){
-//    delete _Logger;
-//}
-
 int RequestProcessing::requestDistribution(std::string requestStringJSON, SOCKET clientSocket){
-    nlohmann::json j = nlohmann::json::parse(requestStringJSON);
 
-    // std::cout << j.dump() << std::endl;
+    ClientRequestStruct::Request acceptedRequest;
+    acceptedRequest.ParseFromString(requestStringJSON);
 
-    if (!j.contains("requestInfo")) {
-        _Logger->addLog("WARN", "request have not case: requestInfo", 2);
-        return 1;
-    }
-
-    if (!j["requestInfo"].contains("requestType")) {
-        _Logger->addLog("WARN", "case: requestInfo, have not key: requestType", 2);
-        return 1;
-    }
-
-    if (j["requestInfo"]["requestType"] == "fileHashRequest") {
+    if (acceptedRequest.requestinfo().type() == ClientRequestStruct::RequestInfo::fileHashRequest) {
         _Logger->addLog("INFO", "Client: require actual files info", 2);
-        //_AutoUpdate->initializeLatestBuildInfo();
-        //_SendResponse->sendJSON(m_responseJSON, "actualClientFilesHashes");
-        _SendResponse->sendJSON(Config::get_instance()->latestBuildInfo, "actualClientFilesHashes", clientSocket);
-    }
 
-    if (j["requestInfo"]["requestType"] == "downloadFile") {
+        _SendResponse->setReponseType("filesHashes");
+
+        _FileInfoFields::iterator it = Config::get_instance()->buildFilesInfo.begin();
+        
+        for (auto& [fileName, filePath, fileHash] : Config::get_instance()->buildFilesInfo) {
+            _SendResponse->addFileInfo(fileHash, filePath, fileName);
+        }
+
+        for (auto& dirPath : Config::get_instance()->buildDirsInfo) {
+            _SendResponse->addDirInfo(dirPath);
+        }
+
+        _SendResponse->sendResponse(clientSocket);
+    }
+    else if (acceptedRequest.requestinfo().type() == ClientRequestStruct::RequestInfo::downloadFile) {
         _Logger->addLog("INFO", "Client: require files", 2);
 
-        for (auto& [fileName, filePath] : j["filesToDownload"].items()) {
-            _SendResponse->sendFile(filePath, fileName, clientSocket);
+        for (int i = 0; i < acceptedRequest.filesinfo_size(); i++) {
+            const ClientRequestStruct::FilesInfo& fileInfo = acceptedRequest.filesinfo(i);
+
+            _SendResponse->sendFile(fileInfo.path(), fileInfo.name(), clientSocket);
         }
+
+    }
+    else {
+
     }
 
     return 0;

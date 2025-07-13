@@ -14,31 +14,57 @@ SendResponse::SendResponse(){
     _Logger = Logger::get_instance();
     _Config = Config::get_instance();
     
-    //_ConnectionHandler = std::make_shared<ConnectionHandler>();
+    _Response = std::make_shared<ResponseStruct::Response>();
 }
 
-//SendResponse::~SendResponse(){
-//    delete _Logger;
-//    delete _Config;
-//
-//    if (_ConnectionHandler != nullptr) delete _ConnectionHandler;
-//}
+void SendResponse::setReponseType(std::string responseType){
+    if (responseType == "filesHashes") {
+        _Response->mutable_responseinfo()->set_type(ResponseStruct::ResponseInfo::filesHashes);
+    }
+    else if (responseType == "downloadFile") {
+        _Response->mutable_responseinfo()->set_type(ResponseStruct::ResponseInfo::downloadFile);
+    }
+    else {
+        _Logger->addLog("WARN", "unknown response type", 2);
+    }
+}
 
-int SendResponse::sendJSON(json j, std::string responseType, SOCKET clientSocket){
-	if (j.empty()) {
-        _Logger->addLog("INFO", "json is empty. Sending json response is stopped.", 2);
-		return 1;
-	}
+void SendResponse::addFileInfo(std::string hash, std::string path, std::string name){
+    auto* fileInfo = _Response->add_fileinfo();
 
-	j["responseInfo"]["responseType"] = responseType;
+    fileInfo->set_filehash(hash);
+    fileInfo->set_filepath(path);
+    fileInfo->set_filename(name);
+}
 
-    //std::cout << j.dump() << std::endl;
-    //std::cout << _ConnectionHandler.getCurrentConnectClientSocket() << std::endl;
-    //std::cout << responseType << std::endl;
+void SendResponse::addDirInfo(std::string dirPath){
+    auto* dirInfo = _Response->add_dirinfo();
 
-	send(clientSocket, j.dump().c_str(), (int)j.dump().size(), 0);
+    dirInfo->set_dirpath(dirPath);
+}
 
-    //std::cout << "(!) Sended: " << j.dump() << std::endl;
+void SendResponse::clearResponse(){
+    _Response->Clear();
+}
+
+int SendResponse::sendResponse(SOCKET clientSocket){
+    std::string data;
+
+    if (!_Response->SerializeToString(&data)) {
+        std::cerr << "Filed to serialize request" << std::endl;
+    }
+
+    if (_Response->responseinfo().type() == ResponseStruct::ResponseInfo::unknown) {
+        std::cerr << "Request will not sending with type requestInfo->requestType: unknown" << std::endl;
+        return 1;
+    }
+
+    if (send(clientSocket, data.c_str(), (int)data.size(), 0) == SOCKET_ERROR) {
+        std::cerr << "Send failed ith error: " << WSAGetLastError() << std::endl;
+    }
+
+    clearResponse();
+
 	return 0;
 }
 
@@ -49,7 +75,7 @@ int SendResponse::sendFile(std::string filePath, std::string fileName, SOCKET cl
     //filePath = std::regex_replace(filePath, std::regex(R"(\")"), "");
 
     //filePath = ".\\latestClientBuild\\" + filePath;
-    filePath = _Config->lastClientBuildDir + "\\" + filePath;
+    filePath = _Config->buildDir + "/" + filePath;
 
     HANDLE hFile = CreateFileA(
         filePath.c_str(),
