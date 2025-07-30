@@ -2,11 +2,10 @@ syntax = "proto3";
 
 package ClientRequestStruct;
 
-message LastBuildInfo{
+message FileInfo{
 	string fileName = 1;
 	string filePath = 2;
 	string fileHash = 3;
-	string dirPath = 4;
 }
 
 message FieldOfRequestData {
@@ -24,8 +23,12 @@ message RequestInfo {
 	requestTypes type = 1;
 }
 
+// MAIN
 message Request {
+	// PERMANENT NECESSARY FIELDS
 	RequestInfo requestInfo = 1; // important field of request info
 	repeated FieldOfRequestData requestData = 2; // main field/s of data
-	repeated FilesInfo filesInfo = 3; // usage on checking update and update
+
+	// OPTIONAL UPDATE FIELDS
+	repeated FileInfo fileInfo = 3; // usage while checking update and updating
 }

@@ -42,7 +42,6 @@ int Logger::logFilesExist(){
 	std::ofstream file;
 
 	file.open(_Config->logDir + "\\latest.txt", std::ios::out);
-	//file.open(_Config.logDir + "\\currently.txt", std::ios::app);
 
 	file.close();
 	return 0;
@@ -51,6 +50,7 @@ int Logger::logFilesExist(){
 int Logger::checkLogDirectoryExist(){
 	if (!std::filesystem::exists(_Config->logDir)) {
 		// std::cout << "Created directory: " << _Config.logDir << std::endl;
+		addLog("INFO", "(logger) Created directory: " + _Config->logDir, 2);
 		std::filesystem::create_directory(_Config->logDir);
 	}
 
@@ -70,7 +70,7 @@ int Logger::fileLog(std::string logType, std::string log){
 }
 
 int Logger::consoleLog(std::string logType, std::string log){
-	std::cout << "[" << logType << "] " << getActualTime() << " " << log << std::endl;
+	printf("[%s] %s %s\n", logType.c_str(), getActualTime().c_str(), log.c_str());
 
 	return 0;
 }
@@ -78,8 +78,6 @@ int Logger::consoleLog(std::string logType, std::string log){
 int Logger::initializeLogger(){
 	checkLogDirectoryExist();
 	logFilesExist();
-
-	//thread(&ConnectionHandler::queueHandler, this).detach();
 
 	return 0;
 }

@@ -1,5 +1,5 @@
 #include "../include/autoUpdate.h"
-//#include "../include/sendResponse.h"
+
 #include <fstream>
 #include <mswsock.h>
 #include <regex>
@@ -7,14 +7,13 @@
 
 #pragma comment(lib, "mswsock.lib")
 
-//SendResponse _SendResponse;
-//AutoUpdate _AutoUpdate;
-//json m_latestBuildInfo;
-
 std::vector <std::string> filesHashesVec;
 std::vector <std::string> filesPathsVec;
-std::vector <std::string> filesNamesVec;
-std::vector <std::string> dirsPathsVec;
+std::vector <std::string> filesNamesVec; // change to multidimensional vector
+// std::vector <std::vector<std::string>> filesInfoVec; { {fileHash, filePath, fileName}, ... }
+
+std::vector <std::string> dirsPathsVec; 
+
 
 AutoUpdate::AutoUpdate(){
     _Config = Config::get_instance();
@@ -32,7 +31,7 @@ std::size_t AutoUpdate::hash_file(const std::string& filePath) {
     return std::hash<std::string>{}(content);
 }
 
-int AutoUpdate::parseFiles(std::filesystem::path directory, std::string parsingType){
+int AutoUpdate::parseFiles(std::filesystem::path directory, std::string parsingType, std::string mainFileNameServer, std::string mainFileNameClient){
     std::filesystem::path directoryWithLatestBuild = directory;
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
@@ -43,19 +42,23 @@ int AutoUpdate::parseFiles(std::filesystem::path directory, std::string parsingT
         }
 
         if (parsingType == "hash") {
-            //m_latestBuildInfo["fileHashes"][entry.path().lexically_normal().filename().string()] = hash_file(entry.path().string());
             filesHashesVec.push_back(std::to_string(hash_file(entry.path().string())));
+            continue;
         }
 
-        if (parsingType == "paths") {
-            //m_latestBuildInfo["filePaths"][entry.path().lexically_normal().filename().string()] = std::regex_replace(entry.path().string(), std::regex(directoryWithLatestBuild.string() + R"(\\)"), "");
+        if (parsingType == "path" && strcmp(entry.path().lexically_normal().filename().string().c_str(), mainFileNameServer.c_str())) {
             filesPathsVec.push_back(std::regex_replace(entry.path().string(), std::regex(directoryWithLatestBuild.string() + R"(\\)"), ""));
         }
+        else {
+            filePath = filePath.parent_path().string() + mainFileNameClient.c_str(); // problem with    path + "/" + path
 
-        auto it = std::find(filesNamesVec.begin(), filesNamesVec.end(), entry.path().lexically_normal().filename().string());
+            filesPathsVec.push_back(std::regex_replace(filePath.string(), std::regex(directoryWithLatestBuild.string() + R"(\\)"), ""));
+        }
+
+        auto it = std::find(filesNamesVec.begin(), filesNamesVec.end(), filePath.filename().string());
 
         if (it == filesNamesVec.end()) {
-            filesNamesVec.push_back(entry.path().lexically_normal().filename().string());
+            filesNamesVec.push_back(filePath.filename().string());
         }
     }
 
@@ -67,10 +70,6 @@ int AutoUpdate::parseDirectories(std::filesystem::path directory) {
 
     for (const auto& entry : std::filesystem::recursive_directory_iterator(directory)) {
         if (entry.is_directory()) {
-            //std::cout << entry.path().string() << std::endl;
-            //filePath = std::regex_replace(filePath, std::regex(R"(\")"), "");
-            //m_latestBuildInfo["directoriesPaths"][entry.path().filename().string()] = std::regex_replace(entry.path().string(), std::regex(directory.string() + R"(\\)"), "");
-            //parseDirectories(entry);
             dirsPathsVec.push_back(std::regex_replace(entry.path().string(), std::regex(directory.string() + R"(\\)"), ""));
         }
     }
@@ -78,59 +77,34 @@ int AutoUpdate::parseDirectories(std::filesystem::path directory) {
     return 0;
 }
 
-//int AutoUpdate::initializeLatestBuildInfo(){
-//    //Config _Config;
-//        //_Config.parseConfig();
-//
-//    //filesHashesMap->find("fd");
-//
-//    std::filesystem::path directory = _Config->lastClientBuildDir;
-//
-//    if (!m_latestBuildInfo.contains("fileHashes")) {
-//        _Logger->addLog("WARN", "json block with fileHashes is empty", 2);
-//        parseFiles(directory, "hash");
-//    }
-//
-//    if (!m_latestBuildInfo.contains("filePaths")) {
-//        _Logger->addLog("WARN", "json block with filePaths is empty", 2);
-//        parseFiles(directory, "paths");
-//    }
-//
-//    std::string str = std::to_string(filesHashesVec.size()) + " " + std::to_string(filesPathsVec.size()) + " " + std::to_string(filesNamesVec.size()) + " ";
-//
-//    _Logger->addLog("INFO", str, 2);
-//
-//
-//    //_SendResponse->sendJSON(m_responseJSON, "actualClientFilesHashes");
-//
-//    // Config::get_instance()->latestBuildInfo = m_latestBuildInfo;
-//    return 0;
-//}
+int AutoUpdate::collectFilesInfoAndroid(){
+    return 0;
+}
 
-int AutoUpdate::collectFilesInfo(){
-    //Config _Config;
-    //_Config.parseConfig();
+int AutoUpdate::collectFilesInfoWin(){
 
-    std::filesystem::path directoryName = _Config->buildDir;
-
-    if (!std::filesystem::is_directory(directoryName)) {
-        _Logger->addLog("WARN", "problems with _Config.clientFilesPath", 2);
+    if (!std::filesystem::is_directory(_Config->buildDirWin)) {
+        std::filesystem::create_directory(_Config->buildDirWin);
+        _Logger->addLog("INFO", "(autoUpdate) created dir for latest client build. Move files to inside dir", 2);
         return 1;
     }
 
-    if (parseFiles(directoryName, "hash") == 0) {
-        _Logger->addLog("INFO", "fileHashes successfully collected", 2);
+    if (parseFiles(_Config->buildDirWin, "hash", _Config->mainExeNameForServerWin, _Config->mainExeNameForClientWin) == 0) {
+        _Logger->addLog("INFO", "(autoUpdate) fileHashes successfully collected", 2);
     }
 
-    if (parseFiles(directoryName, "paths") == 0) {
-        _Logger->addLog("INFO", "filePaths successfully collected", 2);
+    if (parseFiles(_Config->buildDirWin, "path", _Config->mainExeNameForServerWin, _Config->mainExeNameForClientWin) == 0) {
+        _Logger->addLog("INFO", "(autoUpdate) filePaths successfully collected", 2);
     }
 
-    if (parseDirectories(directoryName) == 0) {
-        _Logger->addLog("INFO", "DirectoriesPaths successfully collected", 2);
+    if (parseDirectories(_Config->buildDirWin) == 0) {
+        _Logger->addLog("INFO", "(autoUpdate) DirectoriesPaths successfully collected", 2);
     }
+
+    _Logger->addLog("INFO", "(autoUpdate) name\t\tpath\t\thash", 2);
 
     for (int i = 0; i < filesNamesVec.size(); i++) {
+        _Logger->addLog("INFO", "(autoUpdate) " + filesNamesVec[i] + "\t" + filesPathsVec[i] + "\t" + filesHashesVec[i], 2);
         Config::get_instance()->buildFilesInfo.push_back({ filesNamesVec[i], filesPathsVec[i], filesHashesVec[i] });
     }
 

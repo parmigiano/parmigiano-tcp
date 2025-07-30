@@ -32,6 +32,7 @@ public:
 	~SendResponse() = default;
 
 	void setReponseType(std::string responseType);
+	void addMainFileName(std::string fileName);
 	void addFileInfo(std::string hash, std::string path, std::string name);
 	void addDirInfo(std::string dirPath);
 	void clearResponse();

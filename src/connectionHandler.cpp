@@ -1,16 +1,11 @@
 #include "../include/connectionHandler.h"
 #include "../include/connect.h"
 #include "../include/requestProcessing.h"
-//#include "../include/UsersQueue.h"
 
 #include <iostream>
 #include <queue>
 #include <utility>
 #include <mutex>
-
-//ConnectionHandler _ConnectionHandler;
-//RequestProcessing _requestProcessing;
-//Connection _Connection;
 
 std::mutex queueMutex;
 
@@ -24,27 +19,12 @@ ConnectionHandler::ConnectionHandler(){
     _Connection = std::make_shared <Connection>();
 }
 
-//ConnectionHandler::~ConnectionHandler(){
-//    delete _Logger;
-//
-//    if (_RequestProcessing != nullptr) delete _RequestProcessing;
-//    if (_Connection != nullptr) delete _Connection;
-//}
-
 void ConnectionHandler::addUserToQueue(std::string request, SOCKET socket){
-    //mutex addUserToQueueMutex;
-    //_Logger.addLog("INFO", "Add user to queue", 1);
-
     std::lock_guard<std::mutex> lock(queueMutex);
     usersQueue.push({ request, socket });
-
-    /*if (connectionQueue.empty()) {
-        _Logger.addLog("PROBLEM", "connection queue is empty", 2);
-    }*/
 }
 
 void ConnectionHandler::queueHandler(){
-    //std::cout << "queueHandler\n";
 
     while (true) {
 
@@ -71,7 +51,6 @@ void ConnectionHandler::incomingConnections(){
     int socketCount = 0;
 
     char recvBuffer[1024];
-
 
     while (true) {
         fd_set copySet = masterSet;
@@ -107,10 +86,6 @@ void ConnectionHandler::incomingConnections(){
             }
             else {
                 addUserToQueue(recvBuffer, fd_sock);
-
-
-                /*recvBuffer[bytesIn] = '\0';
-                std::cout << "Received: " << recvBuffer << " " << sizeof(recvBuffer) << std::endl;*/
             }
             
         }

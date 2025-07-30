@@ -19,18 +19,16 @@ private:
 	Config* _Config;
 	Logger* _Logger;
 
-	//SendResponse* _SendResponse = nullptr;
-	//std::shared_ptr<SendResponse> _SendResponse;
-
 	std::size_t hash_file(const std::string& filePath);
-	int parseFiles(std::filesystem::path directory, std::string parsingType);
+	int parseFiles(std::filesystem::path directory, std::string parsingType, std::string mainFileNameServer, std::string mainFileNameClient);
 	int parseDirectories(std::filesystem::path directory);
 public:
 	AutoUpdate();
 	~AutoUpdate() = default;
 
 	// int initializeLatestBuildInfo();
-	int collectFilesInfo();
+	int collectFilesInfoAndroid();
+	int collectFilesInfoWin();
 };
 
 //extern AutoUpdate _AutoUpdate;

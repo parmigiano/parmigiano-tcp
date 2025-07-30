@@ -2,14 +2,18 @@ syntax = "proto3";
 
 package ResponseStruct;
 
-message FileInfo{
+message FileInfo {
 	string fileName = 1;
 	string filePath = 2;
 	string fileHash = 3;
 }
 
-message DirInfo{
+message DirInfo {
 	string dirPath = 1;
+}
+
+message NameOfMainExeFile {
+	string fileName = 1;
 }
 
 message ResponseInfo {
@@ -30,5 +34,6 @@ message Response {
 	// OPTIONAL UPDATE FIELDS
 	// usage while checking update and updating
 	repeated FileInfo fileInfo = 2; 
-	repeated DirInfo dirInfo = 3; 
+	repeated DirInfo dirInfo = 3;
+	NameOfMainExeFile nameOfMainExeFile = 4;
 }

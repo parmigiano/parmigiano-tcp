@@ -24,12 +24,6 @@ int Config::isFile(){
 
     file.open("Config.txt", std::ios::app);
 
-    /*if (!file.is_open()) {
-        std::cerr << "Failed to open file Config.txt" << std::endl;
-        file.close();
-        return 1;
-    }*/
-
     file.close();
 
     return 0;
@@ -39,11 +33,17 @@ void Config::assigningValues(std::string key, std::string value){
     if (key == "serverPort") {
         serverPort = std::stoi(value);
     }
-    else if (key == "lastClientBuildDir") {
-        buildDir = value;
+    else if (key == "lastClientBuildDirWin") {
+        buildDirWin = value;
     } 
     else if (key == "logDir") {
         logDir = value;
+    }
+    else if (key == "mainExeNameForClient") {
+        mainExeNameForClientWin = value;
+    }
+    else if (key == "mainExeNameForServer") {
+        mainExeNameForServerWin = value;
     }
 }
 

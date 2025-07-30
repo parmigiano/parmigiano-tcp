@@ -29,6 +29,10 @@ void SendResponse::setReponseType(std::string responseType){
     }
 }
 
+void SendResponse::addMainFileName(std::string fileName){
+    _Response->mutable_nameofmainexefile()->set_filename(fileName);
+}
+
 void SendResponse::addFileInfo(std::string hash, std::string path, std::string name){
     auto* fileInfo = _Response->add_fileinfo();
 
@@ -60,7 +64,7 @@ int SendResponse::sendResponse(SOCKET clientSocket){
     }
 
     if (send(clientSocket, data.c_str(), (int)data.size(), 0) == SOCKET_ERROR) {
-        std::cerr << "Send failed ith error: " << WSAGetLastError() << std::endl;
+        std::cerr << "Send failed ith error: " << std::to_string(WSAGetLastError()) << std::endl;
     }
 
     clearResponse();
@@ -75,7 +79,7 @@ int SendResponse::sendFile(std::string filePath, std::string fileName, SOCKET cl
     //filePath = std::regex_replace(filePath, std::regex(R"(\")"), "");
 
     //filePath = ".\\latestClientBuild\\" + filePath;
-    filePath = _Config->buildDir + "/" + filePath;
+    filePath = _Config->buildDirWin + "/" + filePath;
 
     HANDLE hFile = CreateFileA(
         filePath.c_str(),
@@ -88,13 +92,13 @@ int SendResponse::sendFile(std::string filePath, std::string fileName, SOCKET cl
     );
 
     if (hFile == INVALID_HANDLE_VALUE) {
-        _Logger->addLog("ERROR", "Failed to open file handle with error: " + GetLastError(), 2);
+        _Logger->addLog("ERROR", "Failed to open file handle with error: " + std::to_string(GetLastError()), 2);
         return 1;
     }
 
     LARGE_INTEGER fileSize;
     if (!GetFileSizeEx(hFile, &fileSize)) {
-        _Logger->addLog("ERROR", "Failed to get file size with error: " + GetLastError(), 2);
+        _Logger->addLog("ERROR", "Failed to get file size with error: " + std::to_string(GetLastError()), 2);
         CloseHandle(hFile);
         return 1;
     }
@@ -129,7 +133,7 @@ int SendResponse::sendFile(std::string filePath, std::string fileName, SOCKET cl
         &tfb,
         0
     )) {
-        _Logger->addLog("ERROR", "TransmitFile failed with error: " + GetLastError(), 2);
+        _Logger->addLog("ERROR", "TransmitFile failed with error: " + std::to_string(GetLastError()), 2);
     }
     else {
         _Logger->addLog("INFO", "File successfully sended: " + filePath, 2);

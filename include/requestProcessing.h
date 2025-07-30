@@ -7,6 +7,8 @@
 #include <memory>
 
 #include "../include/logger.h"
+#include "../include/config.h"
+
 //#include "../include/sendResponse.h"
 //#include "../include/autoUpdate.h"
 #include "../include/ClientRequestStruct.pb.h"
@@ -16,6 +18,7 @@ class SendResponse;
 
 class RequestProcessing {
 private:
+	Config* _Config;
 	Logger* _Logger;
 
 	/*AutoUpdate* _AutoUpdate = nullptr;

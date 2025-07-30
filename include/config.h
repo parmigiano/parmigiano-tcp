@@ -33,10 +33,14 @@ public:
 
     static Config* get_instance();
 
+    //Field for server work
     short int serverPort = 0;
-    std::string buildDir = "";
     std::string logDir = "";
-    //nlohmann::json latestBuildInfo;
+
+    //Fields for update Windows system
+    std::string buildDirWin = "";
+    std::string mainExeNameForClientWin = "";
+    std::string mainExeNameForServerWin = "";
 
     _FileInfoFields buildFilesInfo;
     std::list <std::string> buildDirsInfo;
