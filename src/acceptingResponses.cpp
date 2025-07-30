@@ -59,6 +59,7 @@ int AcceptingResponses::acceptingFiles(std::string filePath){
 			std::cerr << "Accepting file failed with error: " << GetLastError() << std::endl;
 			return 1;
 		}
+
 		memset(recvBuffer, 0, sizeof(recvBuffer));
 	}
 

@@ -28,30 +28,6 @@ void SendingRequests::sendRequest(){
 		std::cerr << "Filed to serialize request"<< std::endl;
 	}
 
-	//for (int i = 0; i < _Request->filesinfo_size(); i++) {
-	//	const RequestStruct::FilesInfo& fileInfoActual = _Request->filesinfo(i);
-
-	//	std::cout << fileInfoActual.hash() << std::endl; //tmp
-
-	//	std::cout << fileInfoActual.name() << std::endl; //tmp
-
-	//	std::cout << fileInfoActual.path() << std::endl; //tmp
-	//}
-
-	//const RequestStruct::RequestInfo& reqInfo = _Request->requestinfo();
-
-	/*switch (reqInfo.type()) {
-	case RequestStruct::RequestInfo::fileHashRequest:
-		std::cout << "request type: fileHashRequest";
-		break;
-	case RequestStruct::RequestInfo::downloadFile:
-		std::cout << "request type: downloadFile";
-		break;
-	case RequestStruct::RequestInfo::unknown:
-		std::cout << "unknown type";
-		break;
-	}*/
-
 	if (_Request->requestinfo().type() == RequestStruct::RequestInfo::unknown) {
 		std::cerr << "Request will not sending with type requestInfo->requestType: unknown" << std::endl;
 		return;

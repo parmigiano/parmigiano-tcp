@@ -20,6 +20,7 @@ private:
 	std::shared_ptr<AcceptingResponses> _AcceptingResponses;
 	std::shared_ptr<SendingRequests> _SendingRequests;
 	std::shared_ptr<Connection> _Connection;
+	std::shared_ptr<ResponseStruct::Response> _Response;
 	//std::shared_ptr<RequestStruct::Request> _Request;
 
 	std::string getHashLatestBuildFromServer();
@@ -28,8 +29,9 @@ private:
 	std::size_t hash_file(const std::string& filePath);
 
 	int downloadFiles();
-	int directoriesExist(ResponseStruct::Response actualFilesInfo);
-	int comparisonHash(ResponseStruct::Response actualFilesInfo);
+	int startUpdater();
+	int directoriesExist(std::shared_ptr<ResponseStruct::Response> actualFilesInfo);
+	int comparisonHash(std::shared_ptr<ResponseStruct::Response> actualFilesInfo);
 
 public:
 	AutoUpdate();
