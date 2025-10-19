@@ -2,35 +2,38 @@
 #define LOGGER_H
 
 #include <string>
-
-#include "../include/config.h"
-
-//class Config;
+#include <fstream>
+#include <mutex>
 
 class Logger {
 private:
 	static Logger* instance_ptr;
 	static std::mutex mtx;
 
-	Config* _Config;
+	enum logType;
+	std::ofstream file;
+
+	// logger configuration
+	std::string serverLogsDir = "./log";
 
 	std::string getActualTime();
 	int logFilesExist();
 	int checkLogDirectoryExist();
-	int fileLog(std::string logType, std::string log);
-	int consoleLog(std::string logType, std::string log);
+	std::string definitionLogType(logType);
+	int fileLog(logType, std::string log);
+	int consoleLog(logType, std::string log);
 public:
 	Logger();
-
 	Logger(const Logger&) = delete;
 	~Logger() = default;
 
 	static Logger* get_instance();
 
-	int initializeLogger();
-	int addLog(std::string logType, std::string log, int loggingFlag); // types - info/error/problem ||| enteringFlag - 0: only file log, 1: only console log 2: file and console log
-};
+	enum logType { info, warn, error };
 
-//extern Logger _Logger;
+	int initializeLogger();
+	void addServerLog(logType, std::string log, unsigned short int loggingFlag); // types - info/warn/error ||| 0: only file log | 1: only console log | 2: file and console log
+	void addSessionLog(logType, std::string log, unsigned short int loggingFlag, std::string sessionID); // sessionID for unique file name. Logs with session is store in other dir
+};
 
 #endif 

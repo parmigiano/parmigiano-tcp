@@ -1,8 +1,8 @@
 #include "../include/main.h"
 
 #include "../include/autoUpdate.h"
-#include "../include/connect.h"
-#include "../include/connectionHandler.h"
+#include "../include/tcpServer.h"
+#include "../include/usersQueue.h"
 
 #include <iostream>
 #include <map>
@@ -15,7 +15,6 @@ int main() {
 	_appControl->startApp();
 
 	delete _appControl;
-
 	system("pause");
 
 	return 0;
@@ -23,36 +22,22 @@ int main() {
 
 AppControl::AppControl(){
 	_Logger = Logger::get_instance();
+	_Logger->initializeLogger();
+
 	_Config = Config::get_instance();
+	_Config->parseConfig();
 
 	_AutoUpdate = std::make_shared<AutoUpdate>();
-	_Connection = std::make_shared<Connection>();
-	_ConnectionHandler = std::make_shared<ConnectionHandler>();
+	_UsersQueue = std::make_shared<UsersQueue>();
+	_TcpServer = std::make_shared<TcpServer>(io_context, std::stoi(_Config->configurationVars["serverPort"]));
 }
 
 int AppControl::startApp() {
-	short int configLoadResult = _Config->parseConfig();
-	_Logger->initializeLogger();
+	_AutoUpdate->collectFilesInfo();
 
-	if (configLoadResult > 0) {
-		_Logger->addLog("WARN", "Probmlem with config file: \"config.txt\"", 2);
-		_Logger->addLog("WARN", "Configure it for succesfull start server", 2);
+	std::thread(&UsersQueue::queueHandler, _UsersQueue.get()).detach();
 
-		return 1;
-	}
-
-	_Logger->addLog("INFO", "Starting server...", 2);
-
-	_Connection->createConnection(std::to_string(_Config->serverPort).c_str());
-
-	_AutoUpdate->collectFilesInfoWin();
-	//_AutoUpdate->collectFilesInfoAndroid();
-
-	std::thread(&ConnectionHandler::queueHandler, _ConnectionHandler.get()).detach();
-
-	_ConnectionHandler->incomingConnections();
-
-	delete _Config;
+	io_context.run();
 
 	return 0;
 }

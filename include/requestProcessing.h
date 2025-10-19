@@ -2,15 +2,12 @@
 #define REQUESTPROCESSING_H
 
 #include <string>
-#include <WinSock2.h>
-#include <WS2tcpip.h>
 #include <memory>
+#include <boost/asio.hpp>
+#include <functional>
 
 #include "../include/logger.h"
 #include "../include/config.h"
-
-//#include "../include/sendResponse.h"
-//#include "../include/autoUpdate.h"
 #include "../include/ClientRequestStruct.pb.h"
 
 //class AutoUpdate;
@@ -21,20 +18,15 @@ private:
 	Config* _Config;
 	Logger* _Logger;
 
-	/*AutoUpdate* _AutoUpdate = nullptr;
-	SendResponse* _SendResponse = nullptr;*/
-
-	//std::shared_ptr<AutoUpdate> _AutoUpdate;
-	//std::unique_ptr<AutoUpdate> _AutoUpdate;
 	std::shared_ptr<SendResponse> _SendResponse;
 
 public:
 	RequestProcessing();
 	~RequestProcessing() = default;
 		
-	int requestDistribution(std::string request, SOCKET clientCoket);
+	int requestDistribution(std::string requestStr, boost::asio::ip::tcp::socket& socket);
+	void filesHashes(ClientRequestStruct::Request acceptedRequest, boost::asio::ip::tcp::socket& socket);
+	void file(ClientRequestStruct::Request acceptedRequest, boost::asio::ip::tcp::socket& socket);
 };
-
-//extern requestProcessing _requestProcessing;
 
 #endif 

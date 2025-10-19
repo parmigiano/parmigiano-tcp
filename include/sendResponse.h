@@ -3,18 +3,14 @@
 
 #include "../include/logger.h"
 #include "../include/config.h"
-//#include "../include/connectionHandler.h"
 #include "../include/ClientRequestStruct.pb.h"
+#include "../include/ResponseStruct.pb.h"
 
 #include <string>
-#include <iostream>
-#include <map>
-#include <WinSock2.h>
 #include <memory>
+#include <boost/asio.hpp>
 
-//class ConnectionHandler;
-
-#include "../include/ResponseStruct.pb.h"
+class Session;
 
 class SendResponse {
 private:
@@ -22,11 +18,7 @@ private:
 	Config* _Config;
 
 	std::shared_ptr<ResponseStruct::Response> _Response;
-
-	//ConnectionHandler* _ConnectionHandler = nullptr;
-
-	//std::shared_ptr<ConnectionHandler> _ConnectionHandler;
-
+	std::shared_ptr<Session> _Session;
 public:
 	SendResponse();
 	~SendResponse() = default;
@@ -36,11 +28,10 @@ public:
 	void addFileInfo(std::string hash, std::string path, std::string name);
 	void addDirInfo(std::string dirPath);
 	void clearResponse();
+	bool checkFileAvaibility(std::string filePath);
 
-	int sendResponse(SOCKET clientSocket);
-	int sendFile(std::string filePath, std::string fileName, SOCKET clientSocket);
+	int sendResponse(boost::asio::ip::tcp::socket& socket);
+	int sendFile(std::string filePath, boost::asio::ip::tcp::socket& socket);
 };
-
-//extern SendResponse _SendResponse;
 
 #endif 

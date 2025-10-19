@@ -2,50 +2,68 @@
 #define CONFIG_H
 
 #include <string>
-#include <iostream>
-#include <map>
-#include <list>
 #include <mutex>
+#include <boost/asio.hpp>
+#include <functional>
+#include <map>
+#include <vector>
 
-class FileInfoFields {
-public:
-    std::string fileName;
-    std::string filePath;
-    std::string fileHash;
+#include "../include/logger.h"
 
-    FileInfoFields(std::string name, std::string path, std::string hash) : fileName(name), filePath(path), fileHash(hash) {};
+struct FilesInfoFields {
+    std::string name;
+    std::string path;
+    std::string hash;
 };
-
-typedef std::list<FileInfoFields> _FileInfoFields;
 
 struct Config {
 private:
     static Config* instance_ptr;
     static std::mutex mtx;
 
-    Config(){}
+    Logger* _Logger;
 
-    int isFile();
-    void assigningValues(std::string key, std::string value);
+    std::string configurationFileName = "Config.txt";
+
+    void assigningValue(std::string key, std::string value);
+    void varsFillingCheck();
+    std::string checkAndRemoveBackspaces(std::string line);
 public:
+    Config();
     Config(const Config&) = delete;
-    ~Config();
+    ~Config() = default;
 
     static Config* get_instance();
+    
+    // main config vars here
+    std::map <std::string, std::string> configurationVars 
+    {
+        // with value "null" will be checking vars for exist in configuration file (for important vars)
+        // with out "null" willnt check vars for exist (for not important vars)
 
-    //Field for server work
-    short int serverPort = 0;
-    std::string logDir = "";
+        // Field for server setting
+        {"serverPort", "null"},
+        {"logDir", "null"},
 
-    //Fields for update Windows system
-    std::string buildDirWin = "";
-    std::string mainExeNameForClientWin = "";
-    std::string mainExeNameForServerWin = "";
+        // Fields for update Windows systems
+        {"buildDir", "null"},
+        {"mainExeNameForClient", "null"},
+        {"mainExeNameForServer", "null"}
+    };
 
-    _FileInfoFields buildFilesInfo;
-    std::list <std::string> buildDirsInfo;
+    // For send responses
+    std::function<void(const boost::system::error_code& error, size_t bytes)> write_handler_ptr;
 
-    int parseConfig();
+    // Data update info
+    std::vector <FilesInfoFields> filesInfo;
+    std::vector <std::string> buildDirsInfo;
+
+    // List of most important files for update
+    std::vector <std::string> impFilesNames = {
+        "mainExeNameForClient"
+    };
+
+    void parseConfig();
 };
 
 #endif 

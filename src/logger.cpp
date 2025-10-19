@@ -1,16 +1,13 @@
 #include "../include/logger.h"
 
 #include "filesystem"
-#include "fstream"
 #include <chrono>
 
 Logger* Logger::instance_ptr = nullptr;
 std::mutex Logger::mtx;
 
-//Logger _Logger;
+Logger::Logger() {
 
-Logger::Logger(){
-	_Config = Config::get_instance();
 }
 
 Logger* Logger::get_instance(){
@@ -39,38 +36,42 @@ std::string Logger::getActualTime(){
 }
 
 int Logger::logFilesExist(){
-	std::ofstream file;
+	file.open(serverLogsDir + "\\latest.txt", std::ios::out);
 
-	file.open(_Config->logDir + "\\latest.txt", std::ios::out);
-
-	file.close();
 	return 0;
 }
 
 int Logger::checkLogDirectoryExist(){
-	if (!std::filesystem::exists(_Config->logDir)) {
-		// std::cout << "Created directory: " << _Config.logDir << std::endl;
-		addLog("INFO", "(logger) Created directory: " + _Config->logDir, 2);
-		std::filesystem::create_directory(_Config->logDir);
+	if (!std::filesystem::exists(serverLogsDir)) {
+		addServerLog(logType::info, "(logger) Created directory: " + serverLogsDir, 2);
+		std::filesystem::create_directory(serverLogsDir);
 	}
 
 	return 0;
 }
 
-int Logger::fileLog(std::string logType, std::string log){
-	std::fstream file;
+std::string Logger::definitionLogType(logType _logType){
+	switch (_logType) {
+	case Logger::info: return "INFO"; 
+	case Logger::warn: return "WARN";
+	case Logger::error: return "ERROR";
+	default: return "UNKWN";
+	}
+}
 
-	file.open(_Config->logDir + "\\latest.txt", std::ios::app);
+int Logger::fileLog(logType _logType, std::string log){
+	std::fstream latestLogFile;
+	latestLogFile.open(serverLogsDir + "\\latest.txt", std::ios::app);
 
-	file << "[" << logType << "] " << getActualTime() << " " << log << std::endl;
+	latestLogFile << "[" << getActualTime() << "] " << definitionLogType(_logType) << " " << log << std::endl;
 
-	file.close();
+	latestLogFile.close();
 
 	return 0;
 }
 
-int Logger::consoleLog(std::string logType, std::string log){
-	printf("[%s] %s %s\n", logType.c_str(), getActualTime().c_str(), log.c_str());
+int Logger::consoleLog(logType _logType, std::string log) {
+	printf("[%s] %s %s\n", getActualTime().c_str(), definitionLogType(_logType).c_str(), log.c_str());
 
 	return 0;
 }
@@ -82,19 +83,32 @@ int Logger::initializeLogger(){
 	return 0;
 }
 
-int Logger::addLog(std::string logType, std::string log, int loggingFlag){
-	if (loggingFlag == 0) {
-		fileLog(logType, log);
+void Logger::addServerLog(logType _logType, std::string log, unsigned short int loggingFlag){
+	try {
+		switch (loggingFlag) {
+		case 0:
+			fileLog(_logType, log);
+			break;
+		case 1:
+			consoleLog(_logType, log);
+			break;
+		case 2:
+			fileLog(_logType, log);
+			consoleLog(_logType, log);
+			break;
+		default:
+			addServerLog(logType::warn, "(logger) unkwn log type" + serverLogsDir, 2);
+			break;
+		}
 	}
-
-	if (loggingFlag == 1) {
-		consoleLog(logType, log);
+	catch (const std::exception& error) {
+		addServerLog(Logger::warn, "(Logger) except: " + std::atoi(error.what()), 2);
 	}
-
-	if (loggingFlag == 2) {
-		fileLog(logType, log);
-		consoleLog(logType, log);
+	catch (...) {
+		addServerLog(Logger::warn, "(Logger) catch unknw error", 2);
 	}
+}
 
-	return 0;
+void Logger::addSessionLog(logType, std::string log, unsigned short int loggingFlag, std::string sessionID){
+
 }
