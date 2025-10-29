@@ -3,17 +3,17 @@ syntax = "proto3";
 package ResponseStruct;
 
 message FileInfo {
-	string fileName = 1;
-	string filePath = 2;
-	string fileHash = 3;
+	string pame = 1; // rename FileName to name
+	string path = 2; // rename FilePath to path
+	string hash = 3; // rename Filehash to hash
 }
 
 message DirInfo {
-	string dirPath = 1;
+	string path = 1; // rename DirPath to path
 }
 
 message NameOfMainExeFile {
-	string fileName = 1;
+	string name = 1; FileName to name
 }
 
 message ResponseInfo {

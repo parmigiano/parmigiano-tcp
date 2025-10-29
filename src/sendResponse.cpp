@@ -1,7 +1,6 @@
 #include "../include/sendResponse.h"
 
 #include <regex>
-#include <fstream>
 #include <filesystem>
 
 SendResponse::SendResponse(){
@@ -23,34 +22,22 @@ void SendResponse::setReponseType(std::string responseType){
     }
 }
 
-void SendResponse::addMainFileName(std::string fileName){
-    _Response->mutable_nameofmainexefile()->set_filename(fileName);
-}
-
-void SendResponse::addFileInfo(std::string hash, std::string path, std::string name){
-    auto* fileInfo = _Response->add_fileinfo();
-
-    fileInfo->set_filehash(hash);
-    fileInfo->set_filepath(path);
-    fileInfo->set_filename(name);
-}
-
-void SendResponse::addDirInfo(std::string dirPath){
-    auto* dirInfo = _Response->add_dirinfo();
-
-    dirInfo->set_dirpath(dirPath);
-}
-
 void SendResponse::clearResponse(){
     _Response->Clear();
 }
 
-bool SendResponse::checkFileAvaibility(std::string filePath){
-    for (auto& fileInfo : _Config->filesInfo) {
-        if (fileInfo.path == filePath) return true;
+std::ifstream SendResponse::openFile(std::string filePath, unsigned int fileSize){
+    std::ifstream file(filePath, std::ios::in | std::ios::binary);
+
+    if (!file) {
+        throw std::runtime_error("(sendResponse) Failed to open file: " + filePath);
     }
 
-    return false;
+    if (fileSize == 0) {
+        throw std::runtime_error("(sendResponse) empty file " + filePath);
+    }
+
+    return file;
 }
 
 int SendResponse::sendResponse(boost::asio::ip::tcp::socket& socket){
@@ -66,8 +53,11 @@ int SendResponse::sendResponse(boost::asio::ip::tcp::socket& socket){
         return 1;
     }
 
-    socket.async_send(boost::asio::buffer(data.c_str(), (int)data.size()), 0, [this](const boost::system::error_code& error, std::size_t bytes) {_Config->write_handler_ptr(error, bytes); });
+    socket.async_send(boost::asio::buffer(data.c_str(), (int)data.size()), 0, [this](const boost::system::error_code& error, std::size_t bytes) {
+        _Config->write_handler_ptr(error, bytes); 
+    });
 
+    data.clear();
     clearResponse();
 
 	return 0;
@@ -78,58 +68,58 @@ int SendResponse::sendFile(std::string filePath, boost::asio::ip::tcp::socket& s
     char buffer[BUFFER_SIZE];
     size_t chunk_count = 0;
     std::streampos currently_ptr_position;
+    unsigned int fileSize;
 
-    /*if (!checkFileAvaibility(filePath)) {
-        _Logger->addServerLog(_Logger->warn, "(sendResponse) Client wanna get file outside allowed", 2);
-        socket.async_send(boost::asio::buffer("end", 3), 0, [this](const boost::system::error_code& error, std::size_t bytes) {_Config->write_handler_ptr(error, bytes); });
+    try {
+        filePath = _Config->configurationVars["buildDir"] + "/" + filePath;
+        fileSize = std::filesystem::file_size(filePath);
+        std::ifstream file = openFile(filePath, fileSize);
 
-        return 1;
-    }*/
+        while (true) { // switch to for(int i = 0; i < fileSize // BUFFER_SIZE: i++) i == ptr to currentrly chunk
+            memset(buffer, 0, sizeof(buffer));
 
-    filePath = _Config->configurationVars["buildDir"] + "/" + filePath;
+            file.seekg(sizeof(buffer) * chunk_count);
 
-    std::ifstream file(filePath, std::ios::in | std::ios::binary); // change to: open files in advance and parse them for possible errors
+            if (fileSize < BUFFER_SIZE) {
+                file.read(buffer, fileSize);
+                socket.async_send(boost::asio::buffer(buffer, fileSize), 0, [this](const boost::system::error_code& error, std::size_t bytes) {
+                    _Config->write_handler_ptr(error, bytes); 
+                });
+            }
+            else {
+                file.read(buffer, sizeof(buffer));
+                socket.async_send(boost::asio::buffer(buffer, BUFFER_SIZE), 0, [this](const boost::system::error_code& error, std::size_t bytes) {
+                    _Config->write_handler_ptr(error, bytes); 
+                });
+            }
 
-    if (!file) { // move it to a separate function
-        _Logger->addServerLog(_Logger->warn, "(sendResponse) Failed to open file: " + filePath, 2);
-        socket.async_send(boost::asio::buffer("end", 3), 0, [this](const boost::system::error_code& error, std::size_t bytes) {_Config->write_handler_ptr(error, bytes); });
-        return 1;
-    }
+            currently_ptr_position = file.tellg();
 
-    unsigned int file_size = std::filesystem::file_size(filePath);
+            chunk_count++;
 
-    if (file_size == 0) { // move it to a separate function and add to list of empty files
-        _Logger->addServerLog(_Logger->warn, "(sendResponse) empty file " + filePath, 2);
-        socket.async_send(boost::asio::buffer("end", 3), 0, [this](const boost::system::error_code& error, std::size_t bytes) {_Config->write_handler_ptr(error, bytes); });
-        return 0;
-    }
+            file.seekg(0, std::ios::end);
 
-    while (true) {
-        memset(buffer, 0, sizeof(buffer));
-
-        file.seekg(sizeof(buffer) * chunk_count);
-
-        if (file_size < BUFFER_SIZE) {
-            file.read(buffer, file_size);
-            socket.async_send(boost::asio::buffer(buffer, file_size), 0, [this](const boost::system::error_code& error, std::size_t bytes) {_Config->write_handler_ptr(error, bytes); });
-        }
-        else {
-            file.read(buffer, sizeof(buffer));
-            socket.async_send(boost::asio::buffer(buffer, BUFFER_SIZE), 0, [this](const boost::system::error_code& error, std::size_t bytes) {_Config->write_handler_ptr(error, bytes); });
+            if (currently_ptr_position == file.tellg()) break;
         }
 
-        currently_ptr_position = file.tellg();
-        
-        chunk_count++;
+        socket.async_send(boost::asio::buffer("end", 3), 0, [this](const boost::system::error_code& error, std::size_t bytes) {
+            _Config->write_handler_ptr(error, bytes); 
+        });
 
-        file.seekg(0, std::ios::end);
-
-        if (currently_ptr_position == file.tellg()) break;
+        file.close(); 
     }
-
-    socket.async_send(boost::asio::buffer("end", 3), 0, [this](const boost::system::error_code& error, std::size_t bytes) {_Config->write_handler_ptr(error, bytes); });
-
-    file.close(); // change to: open files in advance and parse them for possible errors
+    catch (const std::exception& error) {
+        _Logger->addServerLog(_Logger->warn, "(sendResponse) except: " + std::atoi(error.what()), 2);
+        socket.async_send(boost::asio::buffer("end", 3), 0, [this](const boost::system::error_code& error, std::size_t bytes) {
+            _Config->write_handler_ptr(error, bytes); 
+        });
+    }
+    catch (...) {
+        _Logger->addServerLog(_Logger->warn, "(sendResponse) catch unknw error", 2);
+        socket.async_send(boost::asio::buffer("end", 3), 0, [this](const boost::system::error_code& error, std::size_t bytes) {
+            _Config->write_handler_ptr(error, bytes); 
+        });
+    }
     
     return 0;
 }

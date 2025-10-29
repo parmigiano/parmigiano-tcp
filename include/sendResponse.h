@@ -3,6 +3,8 @@
 
 #include "../include/logger.h"
 #include "../include/config.h"
+#include <fstream>
+
 #include "../include/ClientRequestStruct.pb.h"
 #include "../include/ResponseStruct.pb.h"
 
@@ -24,11 +26,8 @@ public:
 	~SendResponse() = default;
 
 	void setReponseType(std::string responseType);
-	void addMainFileName(std::string fileName);
-	void addFileInfo(std::string hash, std::string path, std::string name);
-	void addDirInfo(std::string dirPath);
 	void clearResponse();
-	bool checkFileAvaibility(std::string filePath);
+	std::ifstream openFile(std::string filepath, unsigned int fileSize);
 
 	int sendResponse(boost::asio::ip::tcp::socket& socket);
 	int sendFile(std::string filePath, boost::asio::ip::tcp::socket& socket);

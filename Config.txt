@@ -1,5 +1,2 @@
 serverPort=5462
 logDir=./log
-lastClientBuildDirWin=./latestClientBuild
-mainExeNameForClient=NewClientTralala.exe
-mainExeNameForServer=main.exe

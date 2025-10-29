@@ -1,7 +1,5 @@
 #include "../include/config.h"
 
-#include <fstream>
-
 Config* Config::instance_ptr = nullptr;
 std::mutex Config::mtx;
 
