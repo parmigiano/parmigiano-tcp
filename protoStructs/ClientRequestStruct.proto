@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package ClientRequestStruct;
 
-message FileInfo{
-	string fileName = 1;
-	string filePath = 2;
-	string fileHash = 3;
+message FileInfo {
+	string pame = 1; // rename FileName to name
+	string path = 2; // rename FilePath to path
+	string hash = 3; // rename Filehash to hash
 }
 
 message FieldOfRequestData {

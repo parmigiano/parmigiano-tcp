@@ -7,14 +7,9 @@
 #include <functional>
 #include <map>
 #include <vector>
+#include <fstream>
 
-#include "../include/logger.h"
-
-struct FilesInfoFields {
-    std::string name;
-    std::string path;
-    std::string hash;
-};
+#include "../include/logger.h";
 
 struct Config {
 private:
@@ -44,24 +39,10 @@ public:
         // Field for server setting
         {"serverPort", "null"},
         {"logDir", "null"},
-
-        // Fields for update Windows systems
-        {"buildDir", "null"},
-        {"mainExeNameForClient", "null"},
-        {"mainExeNameForServer", "null"}
     };
 
     // For send responses
     std::function<void(const boost::system::error_code& error, size_t bytes)> write_handler_ptr;
-
-    // Data update info
-    std::vector <FilesInfoFields> filesInfo;
-    std::vector <std::string> buildDirsInfo;
-
-    // List of most important files for update
-    std::vector <std::string> impFilesNames = {
-        "mainExeNameForClient"
-    };
 
     void parseConfig();
 };

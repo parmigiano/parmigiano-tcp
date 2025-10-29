@@ -1,6 +1,5 @@
 #include "../include/main.h"
 
-#include "../include/autoUpdate.h"
 #include "../include/tcpServer.h"
 #include "../include/usersQueue.h"
 
@@ -10,11 +9,12 @@
 
 int main() {
 	setlocale(LC_ALL, "ru");
-	AppControl* _appControl = new AppControl();
+
+	std::shared_ptr<AppControl> _appControl;
+	_appControl = std::make_shared<AppControl>();
 
 	_appControl->startApp();
 
-	delete _appControl;
 	system("pause");
 
 	return 0;
@@ -27,14 +27,11 @@ AppControl::AppControl(){
 	_Config = Config::get_instance();
 	_Config->parseConfig();
 
-	_AutoUpdate = std::make_shared<AutoUpdate>();
 	_UsersQueue = std::make_shared<UsersQueue>();
 	_TcpServer = std::make_shared<TcpServer>(io_context, std::stoi(_Config->configurationVars["serverPort"]));
 }
 
 int AppControl::startApp() {
-	_AutoUpdate->collectFilesInfo();
-
 	std::thread(&UsersQueue::queueHandler, _UsersQueue.get()).detach();
 
 	io_context.run();

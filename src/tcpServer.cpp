@@ -20,7 +20,6 @@ void TcpServer::start_accept(){
 }
 
 void TcpServer::handle_accept(const boost::system::error_code& error){
-
     if (!error) {
         _Logger->addServerLog(_Logger->info, "", 2);
         _Logger->addServerLog(_Logger->info, "----------NEW----------", 2);

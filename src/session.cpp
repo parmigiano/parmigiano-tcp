@@ -8,7 +8,9 @@ Session::Session(boost::asio::io_context& io_context) : socket_(io_context) {
     _Logger = Logger::get_instance();
     _Config = Config::get_instance();
 
-    _Config->write_handler_ptr = [this](const boost::system::error_code& error, size_t bytes) {this->handle_write(error, bytes); };
+    _Config->write_handler_ptr = [this] (const boost::system::error_code& error, size_t bytes) {
+        this->handle_write(error, bytes); 
+    };
 
     _UsersQueue = std::make_shared<UsersQueue>();
 }
@@ -33,7 +35,7 @@ void Session::handle_read(const boost::system::error_code& error, size_t bytes) 
     if (!error) {
         std::string data(data_, bytes);
 
-        _UsersQueue->addUserToQueue(data, Session::socket());
+        _UsersQueue->addUserToQueue(data, Session::socket());   
 
         start();
     }

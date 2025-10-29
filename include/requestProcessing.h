@@ -10,7 +10,6 @@
 #include "../include/config.h"
 #include "../include/ClientRequestStruct.pb.h"
 
-//class AutoUpdate;
 class SendResponse;
 
 class RequestProcessing {
@@ -25,8 +24,6 @@ public:
 	~RequestProcessing() = default;
 		
 	int requestDistribution(std::string requestStr, boost::asio::ip::tcp::socket& socket);
-	void filesHashes(ClientRequestStruct::Request acceptedRequest, boost::asio::ip::tcp::socket& socket);
-	void file(ClientRequestStruct::Request acceptedRequest, boost::asio::ip::tcp::socket& socket);
 };
 
 #endif 

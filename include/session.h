@@ -35,9 +35,6 @@ public:
 	pointer create(boost::asio::io_context& io_context);
 	boost::asio::ip::tcp::socket& socket();
 	void handle_write(const boost::system::error_code& error, size_t bytes);
-	//void (*handle_write_ptr) (const boost::system::error_code&, size_t);
-
-	//void (&handle_write_ptr) (const boost::system::error_code&, size_t) = handle_write;
 	void start();
 };
 

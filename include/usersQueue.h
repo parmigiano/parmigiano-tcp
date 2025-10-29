@@ -4,6 +4,8 @@
 #include <string>
 #include <boost/asio.hpp>
 #include <queue>
+#include <mutex>
+#include <condition_variable>
 
 class RequestProcessing;
 
