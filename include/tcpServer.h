@@ -1,10 +1,6 @@
 #ifndef TCPSERVER_H
 #define TCPSERVER_H
 
-#ifdef _WIN32
-#define _WIN32_WINNT 0x0A00 // force warn for win system
-#endif
-
 #define ASIO_STANDALONE
 #include <boost/asio.hpp>
 #include <memory>

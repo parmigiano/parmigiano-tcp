@@ -9,7 +9,7 @@
 #include <vector>
 #include <fstream>
 
-#include "../include/logger.h";
+#include "logger.h"
 
 struct Config {
 private:

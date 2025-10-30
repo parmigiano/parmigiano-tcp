@@ -20,19 +20,14 @@ Logger* Logger::get_instance(){
 }
 
 std::string Logger::getActualTime(){
-	std::ostringstream oss;
+	std::string timeStr;
 
-	auto now = std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now()); // in UTC format
+	auto now = std::chrono::system_clock::now();
+	auto nowSeconds = std::chrono::floor<std::chrono::seconds>(now);
 
-	auto time_today = now - std::chrono::floor<std::chrono::days>(now);
+	timeStr = std::format("{:%H:%M:%S}", nowSeconds); // UTC time
 
-	auto h = std::chrono::duration_cast<std::chrono::hours>(time_today);
-	auto m = std::chrono::duration_cast<std::chrono::minutes>(time_today - h);
-	auto s = std::chrono::duration_cast<std::chrono::seconds>(time_today - h - m);
-
-	oss << std::setfill('0') << std::setw(2) << h.count() << ':' << std::setw(2) << m.count() << ':' << std::setw(2) << s.count();    
-
-	return oss.str() + "UTC";
+	return timeStr;
 }
 
 int Logger::logFilesExist(){
