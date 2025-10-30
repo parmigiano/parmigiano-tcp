@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 4.1.0)
 
 set(PROJECT_NAME ServerMain)
 set(EXECUTABLE_NAME ServerMain)
-set(PROTO_FILES ./protoStructs)
 
 project(${PROJECT_NAME}) # default LANGUAGE C CXX
+
+set(GENERATED_PROTO_DIR "${CMAKE_BINARY_DIR}/generatedProto")
+file(MAKE_DIRECTORY ${GENERATED_PROTO_DIR})
 
 include(FetchContent)
 
@@ -32,27 +34,26 @@ FetchContent_MakeAvailable(protobuf boost)
 
 include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
 
-file(GLOB SOURCES
+file(GLOB SOURCES_CPP
 	./include/*.h
 	./src/*.cpp
 )
 
-add_executable(${EXECUTABLE_NAME} ${SOURCES})
+add_executable(${EXECUTABLE_NAME} ${SOURCES_CPP})
 
-target_sources(${EXECUTABLE_NAME} PRIVATE 
-	${PROTO_FILES}/ClientRequestStruct.proto
-	${PROTO_FILES}/ResponseStruct.proto
-)
-
-protobuf_generate(TARGET ${EXECUTABLE_NAME} 
+protobuf_generate(
+    TARGET ${EXECUTABLE_NAME}
+    LANGUAGE cpp
 	PROTOS
-	${PROTO_FILES}/ClientRequestStruct.proto
-	${PROTO_FILES}/ResponseStruct.proto
+		./protoStructs/ClientRequestStruct.proto
+		./protoStructs/ResponseStruct.proto
+    PROTOC_OUT_DIR ${GENERATED_PROTO_DIR}
+    IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/protoStructs
 )
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE # replace #include "../include/ConnectionManager.h" to #include "ConnectionManager.h"
 	${CMAKE_CURRENT_SOURCE_DIR}/include
-	${CMAKE_CURRENT_BINARY_DIR}
+	${GENERATED_PROTO_DIR}
 )
 
 target_link_libraries(${EXECUTABLE_NAME} # link protobuf and boost with project
