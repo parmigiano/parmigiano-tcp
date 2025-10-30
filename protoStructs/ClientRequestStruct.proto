@@ -18,6 +18,13 @@ message RequestInfo {
 		unknown = 0;
 		fileHashRequest = 1;
 		downloadFile = 2;
+		sendMessage = 3;
+		readMessage = 4;
+		editMessage = 5;
+		deleteMessage = 6;
+		userTyping = 7;
+		userOnlineStatus = 8;
+		getUnreadMessageCount = 9;
 	}
 
 	requestTypes type = 1;

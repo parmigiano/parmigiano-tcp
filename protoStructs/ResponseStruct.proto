@@ -13,7 +13,7 @@ message DirInfo {
 }
 
 message NameOfMainExeFile {
-	string name = 1; FileName to name
+	string name = 1; 
 }
 
 message ResponseInfo {
