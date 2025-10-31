@@ -5,8 +5,8 @@
 #include "../include/config.h"
 #include <fstream>
 
-#include "../include/ClientRequestStruct.pb.h"
-#include "../include/ResponseStruct.pb.h"
+#include "ClientRequestStruct.pb.h"
+#include "ResponseStruct.pb.h"
 
 #include <string>
 #include <memory>

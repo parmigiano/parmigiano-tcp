@@ -8,7 +8,7 @@
 
 #include "../include/logger.h"
 #include "../include/config.h"
-#include "../include/ClientRequestStruct.pb.h"
+#include "ClientRequestStruct.pb.h"
 
 class SendResponse;
 

@@ -66,19 +66,16 @@ int SendResponse::sendResponse(boost::asio::ip::tcp::socket& socket){
 int SendResponse::sendFile(std::string filePath, boost::asio::ip::tcp::socket& socket){
     const int BUFFER_SIZE = 1024;
     char buffer[BUFFER_SIZE];
-    size_t chunk_count = 0;
-    std::streampos currently_ptr_position;
-    unsigned int fileSize;
+    filePath = _Config->configurationVars["buildDir"] + "/" + filePath;
+    unsigned int fileSize = std::filesystem::file_size(filePath);
 
     try {
-        filePath = _Config->configurationVars["buildDir"] + "/" + filePath;
-        fileSize = std::filesystem::file_size(filePath);
         std::ifstream file = openFile(filePath, fileSize);
 
-        while (true) { // switch to for(int i = 0; i < fileSize // BUFFER_SIZE: i++) i == ptr to currentrly chunk
+        for (int i = 0; i < fileSize / BUFFER_SIZE; i++) {
             memset(buffer, 0, sizeof(buffer));
 
-            file.seekg(sizeof(buffer) * chunk_count);
+            file.seekg(sizeof(buffer) * i);
 
             if (fileSize < BUFFER_SIZE) {
                 file.read(buffer, fileSize);
@@ -92,14 +89,6 @@ int SendResponse::sendFile(std::string filePath, boost::asio::ip::tcp::socket& s
                     _Config->write_handler_ptr(error, bytes); 
                 });
             }
-
-            currently_ptr_position = file.tellg();
-
-            chunk_count++;
-
-            file.seekg(0, std::ios::end);
-
-            if (currently_ptr_position == file.tellg()) break;
         }
 
         socket.async_send(boost::asio::buffer("end", 3), 0, [this](const boost::system::error_code& error, std::size_t bytes) {
