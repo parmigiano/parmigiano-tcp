@@ -1,0 +1,285 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          tags: true
+
+      - name: Set up Git
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +'%Y/%m/%d')" >> $GITHUB_OUTPUT
+
+      - name: Get next version tag
+        id: version
+        run: |
+          latest=$(git tag --sort=-v:refname | grep '^v' | head -n 1)
+
+          if [ -z "$latest" ]; then
+            version="v0.1.0"
+          else
+            raw_version=${latest#v}
+            major=$(echo "$raw_version" | cut -d. -f1)
+            minor=$(echo "$raw_version" | cut -d. -f2)
+            patch=$(echo "$raw_version" | cut -d. -f3)
+
+            bug_count=0
+            dependencies_count=0
+
+            issues=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues?state=closed&per_page=100")
+
+            prs=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls?state=closed&per_page=100")
+
+            for issue in $(echo "$issues" | jq -r '.[] | @base64'); do
+              issue_title=$(echo "$issue" | base64 --decode | jq -r '.title')
+              issue_labels=$(echo "$issue" | base64 --decode | jq -r '.labels | .[].name')
+
+              if [[ "$issue_labels" == *"bug"* ]]; then
+                bug_count=$((bug_count + 1))
+              fi
+
+              if [[ "$issue_labels" == *"dependencies"* ]]; then
+                dependencies_count=$((dependencies_count + 1))
+              fi
+            done
+
+            for pr in $(echo "$prs" | jq -r '.[] | @base64'); do
+              pr_decoded=$(echo "$pr" | base64 --decode)
+              merged_at=$(echo "$pr_decoded" | jq -r '.merged_at')
+
+              if [ "$merged_at" = "null" ]; then
+                continue
+              fi
+
+              labels=$(echo "$pr_decoded" | jq -r '.labels | .[].name')
+
+              if echo "$labels" | grep -q "bug"; then
+                bug_count=$((bug_count + 1))
+              fi
+
+              if echo "$labels" | grep -q "dependencies"; then
+                dependencies_count=$((dependencies_count + 1))
+              fi
+            done
+
+            if [ $bug_count -gt 0 ] || [ $dependencies_count -gt 0 ]; then
+              patch=$((patch + bug_count + dependencies_count))
+            fi
+
+            minor=$((minor + 1))
+            version="v$major.$minor.$patch"
+          fi
+
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Create tag
+        run: |
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
+
+      - name: Generate changelog from merged PRs and closed issues
+        id: changelog
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const currentVersion = "${{ steps.version.outputs.version }}";
+              const { data: releases } = await github.rest.repos.listReleases({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+              });
+
+              const lastRelease = releases.find(r => !r.prerelease && r.tag_name !== currentVersion);
+              let since;
+              if (lastRelease) {
+                  since = new Date(lastRelease.created_at).toISOString();
+              } else {
+                  since = "1970-01-01T00:00:00Z";
+              }
+
+              const { data: pulls } = await github.rest.pulls.list({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  state: "closed",
+                  sort: "updated",
+                  direction: "desc",
+                  per_page: 100
+              });
+              const mergedPRs = pulls.filter(pr => pr.merged_at && pr.merged_at > since);
+              const prChangelog = mergedPRs.map(pr => `- ${pr.title} (#${pr.number})`).join("\n");
+
+              const { data: issues } = await github.rest.issues.listForRepo({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  state: "closed",
+                  sort: "updated",
+                  direction: "desc",
+                  per_page: 100
+              });
+
+              const closedIssues = issues.filter(issue => !issue.pull_request && new Date(issue.closed_at) > new Date(since));
+
+              const labelGroups = {};
+              closedIssues.forEach(issue => {
+                if (issue.labels.length === 0) {
+                  if (!labelGroups["Other"]) labelGroups["Other"] = [];
+                  labelGroups["Other"].push(issue);
+                } else {
+                  issue.labels.forEach(label => {
+                    const name = label.name;
+                    if (!labelGroups[name]) labelGroups[name] = [];
+                    labelGroups[name].push(issue);
+                  });
+                }
+              });
+
+              let issueChangelogByLabel = "";
+              const labelTitles = {
+                new: "## Enhancements",
+                bug: "## Bug Fixes",
+                git: "## Git",
+                http: "## HTTP Server",
+                front: "## HTTP Client",
+                Other: "## Other"
+              };
+
+              for (const [label, items] of Object.entries(labelGroups)) {
+                const title = labelTitles[label] || `## ${label.charAt(0).toUpperCase() + label.slice(1)}`;
+                const list = items.map(issue => `- ${issue.title} (#${issue.number})`).join("\n");
+                issueChangelogByLabel += `${title}\n\n${list}\n\n`;
+              }
+
+              core.setOutput("changelog_pr", prChangelog);
+              core.setOutput("changelog_issues_by_label", issueChangelogByLabel.trim());
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: "${{ steps.version.outputs.version }}"
+          body: |
+            ### TCP Server (main)
+
+            **TCP Server** is responsible for data transmission, processing, and storage.
+
+            - `Protobuf` is used for data exchange and processing.
+            - `Boost.asio` is used for connecting between the **client** and the **server**.
+            - `TCP/IP` stack
+            - `C++` programming language
+
+            ---
+
+            ### Quick start
+
+            A quick start that will help you get the server up and running quickly
+
+            ---
+
+            #### Cloning into github
+
+            Clones an open-source repository from github
+
+            ```cmd
+            git clone https://github.com/parmigiano/parmigiano-tcp.git
+            ```
+
+            ---
+
+            #### Change directory to parmigiano-tcp
+
+            After copying the source files, you need to navigate to the folder containing them in order to continue working
+
+            ```cmd
+            cd parmigiano-tcp
+            ```
+
+            ---
+
+            #### Create directory build
+
+            Creating a `build` folder that will contain different types of builds
+
+            ```cmd
+            mkdir build && cd build
+            ```
+
+            ---
+
+            #### Create subdirectory nmake
+
+            A subdirectory where the nmake-generated files will be stored
+
+            ```cmd
+            mkdir nmake && cd nmake
+            ```
+
+            ---
+
+            #### Generating with nmake
+
+            Generating build files for nmake
+
+            ```cmd
+            cmake -G "NMake Makefiles" ../..
+            ```
+
+            ---
+
+            #### Build project
+
+            Will building all file (libraries and project). Takes up more memory and takes longer to build
+
+            ```cmd
+            nmake
+            ```
+
+            **Recomended**. Ready-made executable file will be compiled. It will be packed in the `executable` folder in the source files
+
+            ```cmd
+            nmake dist
+            ```
+
+            Clean build. You'll need to rebuild using nmake
+
+            ```cmd
+            nmake clean
+            ```
+
+            ### Install client
+
+            Go to the releases page: 👉 [releases](https://github.com/parmigiano/parmigiano-desktop/releases), and download the latest stable version, for example: `ParmigianoChatSetup.exe`
+
+            ${{ steps.changelog.outputs.changelog_issues_by_label }}
+
+            ### Pull Requests
+            ${{ steps.changelog.outputs.changelog_pr }}
+
+            © Parmigiano corp.
+
+      - name: Create new branch for next version
+        run: |
+          raw_version="${{ steps.version.outputs.version }}"
+          raw_version=${raw_version#v}
+          major=$(echo "$raw_version" | cut -d. -f1)
+          minor=$(echo "$raw_version" | cut -d. -f2)
+
+          next_minor=$((minor + 1))
+          next_version="v$major.$next_minor.x"
+
+          git checkout -b "$next_version"
+          git push origin "$next_version" || git push origin "$next_version"
