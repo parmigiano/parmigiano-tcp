@@ -5,7 +5,6 @@ set(EXECUTABLE_NAME ServerMain)
 
 project(${PROJECT_NAME}) # default LANGUAGE C CXX
 
-set(FINAL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LOLOLOLLO)
 set(GENERATED_PROTO_DIR "${CMAKE_BINARY_DIR}/generatedProto")
 file(MAKE_DIRECTORY ${GENERATED_PROTO_DIR})
 
@@ -79,3 +78,14 @@ add_custom_target(copy_exe ALL
     DEPENDS ${EXECUTABLE_NAME}
     COMMENT "Copying executable to folder"
 )
+
+add_custom_target(dist
+    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/executable
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/executable
+    COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:${EXECUTABLE_NAME}>
+        ${CMAKE_CURRENT_SOURCE_DIR}/executable/
+    COMMENT "Creating clean distribution"
+)
+
+add_dependencies(dist ${EXECUTABLE_NAME})
