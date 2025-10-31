@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches: ["**"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tcp_server_build:
+    name: Build TCP server
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++ git wget
+
+      - name: Install modern CMake (4.1.0)
+        run: |
+          wget https://github.com/Kitware/CMake/releases/download/v4.1.0/cmake-4.1.0-linux-x86_64.tar.gz
+          tar -xzf cmake-4.1.0-linux-x86_64.tar.gz
+          sudo mv cmake-4.1.0-linux-x86_64 /opt/cmake
+          sudo ln -sf /opt/cmake/bin/* /usr/local/bin/
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build project
+        run: |
+          cmake --build build --target all -- -j$(nproc)
+
+  deploy_prod:
+    name: Deploy production
+    runs-on: ubuntu-latest
+    needs: [tcp_server_build]
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          port: 22
+          script: |
+            set -e
+
+            cd /root/parmigiano-tcp
+
+            git stash
+            git checkout main
+            git pull origin main
+
+            mkdir -p build
+            cd build
+            ninja -j$(nproc)
+
+            bash systemd

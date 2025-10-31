@@ -1,0 +1,20 @@
+[Unit]
+Description=C++ TCP Server
+After=network.target
+
+[Service]
+ExecStart=/root/parmigiano-tcp/executable/ServerMain
+WorkingDirectory=/root/parmigiano-tcp
+Restart=always
+RestartSec=5s
+StartLimitBurst=10
+StartLimitIntervalSec=60
+User=root
+Group=root
+Environment="PORT=5462"
+LimitNOFILE=1048576
+
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

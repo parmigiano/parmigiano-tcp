@@ -1,0 +1,30 @@
+#!/bin/bash
+
+set -e
+
+# COLORS
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
+NC='\033[0m'
+
+GO_VERSION="1.24.0"
+
+HOME="$(git rev-parse --show-toplevel)"
+
+cd "$HOME"
+ninja dist
+
+sudo cp "$HOME/.systemd/server_tcp.service" /etc/systemd/system/
+
+sudo systemctl stop server_tcp.service
+
+sudo systemctl daemon-reload
+
+sudo systemctl start server_tcp.service
+
+sudo systemctl status server_tcp.service
+
+sudo systemctl enable server_tcp.service
+
+echo -e "${GREEN}Successful creation and launch of systemd services!${NC}"

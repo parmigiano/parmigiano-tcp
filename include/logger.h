@@ -6,11 +6,13 @@
 #include <mutex>
 
 class Logger {
+public:
+	enum logType { info, warn, error };
+	
 private:
 	static Logger* instance_ptr;
 	static std::mutex mtx;
 
-	enum logType;
 	std::ofstream file;
 
 	// logger configuration
@@ -29,11 +31,9 @@ public:
 
 	static Logger* get_instance();
 
-	enum logType { info, warn, error };
-
 	int initializeLogger();
 	void addServerLog(logType, std::string log, unsigned short int loggingFlag); // types - info/warn/error ||| 0: only file log | 1: only console log | 2: file and console log
 	void addSessionLog(logType, std::string log, unsigned short int loggingFlag, std::string sessionID); // sessionID for unique file name. Logs with session is store in other dir
 };
 
-#endif 
+#endif

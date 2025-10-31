@@ -9,7 +9,7 @@
 #include <boost/asio.hpp>
 
 #include "../include/logger.h"
-#include "../include/Config.h"
+#include "../include/config.h"
 
 class UsersQueue;
 
@@ -38,4 +38,4 @@ public:
 	void start();
 };
 
-#endif 
+#endif
