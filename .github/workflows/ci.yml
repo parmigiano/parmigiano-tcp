@@ -63,8 +63,8 @@ jobs:
             git checkout main
             git pull origin main
 
-            cd build
+            cd /root/parmigiano-tcp/build
             ninja -j$(nproc)
 
-            cd ./scripts
+            cd /root/parmigiano-tcp/scripts
             bash systemd
