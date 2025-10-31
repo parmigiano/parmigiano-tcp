@@ -5,6 +5,7 @@ set(EXECUTABLE_NAME ServerMain)
 
 project(${PROJECT_NAME}) # default LANGUAGE C CXX
 
+set(FINAL_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LOLOLOLLO)
 set(GENERATED_PROTO_DIR "${CMAKE_BINARY_DIR}/generatedProto")
 file(MAKE_DIRECTORY ${GENERATED_PROTO_DIR})
 
@@ -45,8 +46,8 @@ protobuf_generate(
     TARGET ${EXECUTABLE_NAME}
     LANGUAGE cpp
 	PROTOS
-		./protoStructs/ClientRequestStruct.proto
-		./protoStructs/ResponseStruct.proto
+		${CMAKE_CURRENT_SOURCE_DIR}/protoStructs/ClientRequestStruct.proto
+		${CMAKE_CURRENT_SOURCE_DIR}/protoStructs/ResponseStruct.proto
     PROTOC_OUT_DIR ${GENERATED_PROTO_DIR}
     IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/protoStructs
 )
@@ -69,3 +70,12 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
 )
 
 add_definitions(-D_WIN32_WINNT=0x0601)
+
+add_custom_target(copy_exe ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/executable
+    COMMAND ${CMAKE_COMMAND} -E copy
+        $<TARGET_FILE:${EXECUTABLE_NAME}>
+        ${CMAKE_CURRENT_SOURCE_DIR}/executable/$<TARGET_FILE_NAME:${EXECUTABLE_NAME}>
+    DEPENDS ${EXECUTABLE_NAME}
+    COMMENT "Copying executable to folder"
+)
