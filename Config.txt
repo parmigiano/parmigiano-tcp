@@ -1,2 +1,4 @@
 serverPort=5462
 logDir=./log
+logMode=develop
+sessionLiveTime=1

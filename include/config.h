@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "logger.h"
+
 #include <string>
 #include <mutex>
 #include <boost/asio.hpp>
@@ -8,8 +10,6 @@
 #include <map>
 #include <vector>
 #include <fstream>
-
-#include "logger.h"
 
 struct Config {
 private:
@@ -39,6 +39,8 @@ public:
         // Field for server setting
         {"serverPort", "null"},
         {"logDir", "null"},
+        {"logMode", "null"}, // develop or production
+        {"sessionLiveTime", "null"}, // in minutes
     };
 
     // For send responses

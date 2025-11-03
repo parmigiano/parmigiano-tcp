@@ -12,7 +12,7 @@ SendResponse::SendResponse(){
 
 void SendResponse::setReponseType(std::string responseType){
     if (responseType == "filesHashes") {
-        _Response->mutable_responseinfo()->set_type(ResponseStruct::ResponseInfo::filesHashes);
+        _Response->mutable_responseinfo()->set_type(ResponseStruct::ResponseInfo::fileHashRequest);
     }
     else if (responseType == "downloadFile") {
         _Response->mutable_responseinfo()->set_type(ResponseStruct::ResponseInfo::downloadFile);
@@ -20,6 +20,40 @@ void SendResponse::setReponseType(std::string responseType){
     else {
         _Logger->addServerLog(_Logger->warn, "(sendResponse) unknown response type", 2);
     }
+}
+
+void SendResponse::setDisonnectType(disconnectType type) {
+    auto* disconnectInfo = _Response->mutable_disconnectnotifying();
+
+    switch (type) {
+    case SendResponse::warn:
+        disconnectInfo->set_type(ResponseStruct::DisconnectNotifying_types_warn);
+        break;
+    case SendResponse::error:
+        disconnectInfo->set_type(ResponseStruct::DisconnectNotifying_types_error);
+        break;
+    case SendResponse::tempBan:
+        disconnectInfo->set_type(ResponseStruct::DisconnectNotifying_types_tempBan);
+        break;
+    case SendResponse::inactive:
+        disconnectInfo->set_type(ResponseStruct::DisconnectNotifying_types_inactive);
+        break;
+    case SendResponse::unknown:
+        disconnectInfo->set_type(ResponseStruct::DisconnectNotifying_types_unknown);
+        break;
+    }
+}
+
+void SendResponse::setDisconnectDescription(std::string description) {
+    auto* disconnectInfo = _Response->mutable_disconnectnotifying();
+
+    disconnectInfo->set_description(description);
+}
+
+void SendResponse::setDisconnectCode(short int code) {
+    auto* disconnectInfo = _Response->mutable_disconnectnotifying();
+
+    disconnectInfo->set_code(code);
 }
 
 void SendResponse::clearResponse(){

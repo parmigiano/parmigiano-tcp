@@ -1,16 +1,17 @@
 #ifndef REQUESTPROCESSING_H
 #define REQUESTPROCESSING_H
 
+#include "../include/logger.h"
+#include "../include/config.h"
+#include "ClientRequestStruct.pb.h"
+
 #include <string>
 #include <memory>
 #include <boost/asio.hpp>
 #include <functional>
 
-#include "../include/logger.h"
-#include "../include/config.h"
-#include "ClientRequestStruct.pb.h"
-
 class SendResponse;
+class SessionManager;
 
 class RequestProcessing {
 private:
@@ -18,6 +19,7 @@ private:
 	Logger* _Logger;
 
 	std::shared_ptr<SendResponse> _SendResponse;
+	std::shared_ptr<SessionManager> _SessionManager;
 
 public:
 	RequestProcessing();

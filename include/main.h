@@ -1,14 +1,16 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <memory>
-#include <boost/asio.hpp>
-
 #include "../include/logger.h"
 #include "../include/config.h"
 
+#include <memory>
+#include <boost/asio.hpp>
+
 class TcpServer;
 class UsersQueue;
+class Scheduler;
+//class Task;
 
 class AppControl {
 private:
@@ -17,6 +19,8 @@ private:
 
 	std::shared_ptr<TcpServer> _TcpServer;
 	std::shared_ptr<UsersQueue> _UsersQueue;
+	std::shared_ptr<Scheduler> _Scheduler;
+	//std::shared_ptr<Task> _Task;
 
 	boost::asio::io_context io_context;
 public:

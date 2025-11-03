@@ -2,11 +2,12 @@
 #define TCPSERVER_H
 
 #define ASIO_STANDALONE
-#include <boost/asio.hpp>
-#include <memory>
 
 #include "../include/logger.h"
 #include "../include/config.h"
+
+#include <boost/asio.hpp>
+#include <memory>
 
 class Session;
 

@@ -3,9 +3,9 @@ syntax = "proto3";
 package ClientRequestStruct;
 
 message FileInfo {
-	string pame = 1; // rename FileName to name
-	string path = 2; // rename FilePath to path
-	string hash = 3; // rename Filehash to hash
+	string pame = 1;
+	string path = 2;
+	string hash = 3;
 }
 
 message FieldOfRequestData {
@@ -15,16 +15,17 @@ message FieldOfRequestData {
 
 message RequestInfo {
 	enum requestTypes{
-		unknown = 0;
+		unknown	= 0;
 		fileHashRequest = 1;
 		downloadFile = 2;
 		sendMessage = 3;
 		readMessage = 4;
 		editMessage = 5;
-		deleteMessage = 6;
-		userTyping = 7;
-		userOnlineStatus = 8;
-		getUnreadMessageCount = 9;
+		pinMessage = 6;
+		deleteMessage = 7;
+		userTyping = 8;
+		userOnlineStatus = 9;
+		getUnreadMessageCount = 10;
 	}
 
 	requestTypes type = 1;

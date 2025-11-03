@@ -3,18 +3,19 @@
 
 #include "../include/logger.h"
 #include "../include/config.h"
-#include <fstream>
-
 #include "ClientRequestStruct.pb.h"
 #include "ResponseStruct.pb.h"
 
 #include <string>
+#include <fstream>
 #include <memory>
 #include <boost/asio.hpp>
 
 class Session;
 
 class SendResponse {
+public:
+	enum disconnectType { warn, error, tempBan, inactive, unknown };
 private:
 	Logger* _Logger;
 	Config* _Config;
@@ -26,6 +27,9 @@ public:
 	~SendResponse() = default;
 
 	void setReponseType(std::string responseType);
+	void setDisonnectType(disconnectType);
+	void setDisconnectDescription(std::string description);
+	void setDisconnectCode(short int code);
 	void clearResponse();
 	std::ifstream openFile(std::string filepath, unsigned int fileSize);
 

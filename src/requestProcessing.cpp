@@ -1,6 +1,7 @@
 #include "../include/requestProcessing.h"
 
 #include "../include/sendResponse.h"
+#include "../include/sessionManager.h"
 
 #include <regex>
 
@@ -9,11 +10,16 @@ RequestProcessing::RequestProcessing(){
     _Config = Config::get_instance();
     
     _SendResponse = std::make_shared<SendResponse>();
+    _SessionManager = std::make_shared<SessionManager>();
 }
 
 int RequestProcessing::requestDistribution(std::string requestStr, boost::asio::ip::tcp::socket& socket){
     ClientRequestStruct::Request acceptedRequest;
     acceptedRequest.ParseFromString(requestStr);
+
+    // use session manager to assigning session
+    // and
+    // update last activity time
 
     try {
         switch (acceptedRequest.requestinfo().type()) {
