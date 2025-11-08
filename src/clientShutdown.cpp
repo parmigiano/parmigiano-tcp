@@ -4,7 +4,7 @@
 
 #include "vector"
 
-ClientShutdown::clientShutdown() {
+ClientShutdown::ClientShutdown() {
 	_Logger = Logger::get_instance();
 	_Config = Config::get_instance();
     _SessionManager = SessionManager::get_instance();
