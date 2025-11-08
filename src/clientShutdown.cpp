@@ -4,7 +4,7 @@
 
 #include "vector"
 
-裭ientShutdown::裭ientShutdown() {
+小lientShutdown::小lientShutdown() {
 	_Logger = Logger::get_instance();
 	_Config = Config::get_instance();
     _SessionManager = SessionManager::get_instance();
@@ -12,39 +12,39 @@
 	_SendResponse = std::make_shared<SendResponse>();
 }
 
-void 裭ientShutdown::disconnectCommon(boost::asio::ip::tcp::socket& client_socket) {
+void 小lientShutdown::disconnectCommon(boost::asio::ip::tcp::socket& client_socket) {
     client_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
     client_socket.close();
 }
 
-void 裭ientShutdown::disconnect(uint64_t& UID) {
+void 小lientShutdown::disconnect(uint64_t& UID) {
     boost::asio::ip::tcp::socket& client_socket = _SessionManager->getSessionSocket(UID);
 
     disconnectCommon(client_socket);
 }
 
-void 裭ientShutdown::disconnect(boost::asio::ip::tcp::socket& client_socket) {
+void 小lientShutdown::disconnect(boost::asio::ip::tcp::socket& client_socket) {
     disconnectCommon(client_socket);
 }
 
-void 裭ientShutdown::notifyCommon(boost::asio::ip::tcp::socket& client_socket, std::string& description, short int& code, disconnectType& disconnect_type) {
+void 小lientShutdown::notifyCommon(boost::asio::ip::tcp::socket& client_socket, std::string& description, short int& code, disconnectType& disconnect_type) {
     _SendResponse->setDisconnectDescription(description);
     _SendResponse->setDisconnectCode(code);
 
     switch (disconnect_type) {
-    case 裭ientShutdown::error:
+    case 小lientShutdown::error:
         _SendResponse->setDisonnectType(_SendResponse->error);
         break;
-    case 裭ientShutdown::warn:
+    case 小lientShutdown::warn:
         _SendResponse->setDisonnectType(_SendResponse->warn);
         break;
-    case 裭ientShutdown::tempBan:
+    case 小lientShutdown::tempBan:
         _SendResponse->setDisonnectType(_SendResponse->tempBan);
         break;
-    case 裭ientShutdown::inactive:
+    case 小lientShutdown::inactive:
         _SendResponse->setDisonnectType(_SendResponse->inactive);
         break;
-    case 裭ientShutdown::littleInfo:
+    case 小lientShutdown::littleInfo:
         _SendResponse->setDisonnectType(_SendResponse->inactive);
         break;
     default:
@@ -55,17 +55,17 @@ void 裭ientShutdown::notifyCommon(boost::asio::ip::tcp::socket& client_socket, s
     _SendResponse->sendResponse(client_socket);
 }
 
-void 裭ientShutdown::notify(uint64_t& UID, std::string description, short int code, disconnectType& disconnect_type) {
+void 小lientShutdown::notify(uint64_t& UID, std::string description, short int code, disconnectType& disconnect_type) {
     boost::asio::ip::tcp::socket& client_socket = _SessionManager->getSessionSocket(UID);
 
     notifyCommon(client_socket, description, code, disconnect_type);
 }
 
-void 裭ientShutdown::notify(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType& disconnect_type) {
+void 小lientShutdown::notify(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType& disconnect_type) {
     notifyCommon(client_socket, description, code, disconnect_type);
 }
 
-void 裭ientShutdown::disconnectClientByReason(uint64_t& UID, std::string description, short int code, disconnectType disconnect_type) {
+void 小lientShutdown::disconnectClientByReason(uint64_t& UID, std::string description, short int code, disconnectType disconnect_type) {
     try {
         notify(UID, description, code, disconnect_type);
         disconnect(UID);
@@ -78,7 +78,7 @@ void 裭ientShutdown::disconnectClientByReason(uint64_t& UID, std::string descrip
     }
 }
 
-void 裭ientShutdown::disconnectClientByReason(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType disconnect_type) {
+void 小lientShutdown::disconnectClientByReason(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType disconnect_type) {
     try {
         disconnect(client_socket);
     }

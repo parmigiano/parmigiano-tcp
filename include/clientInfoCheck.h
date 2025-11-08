@@ -7,14 +7,14 @@
 
 #include <string>
 
-class ÑlientShutdown;
+class Ð¡lientShutdown;
 
 class ClientInfoCheck {
 private:
 	Logger* _Logger;
 	//SessionManager* _SessionManager;s
 
-	std::shared_ptr<ÑlientShutdown> _ClientShutdown;
+	std::shared_ptr<Ð¡lientShutdown> _ClientShutdown;
 
 	bool checkUID(uint64_t& UID, boost::asio::ip::tcp::socket& client_socket);
 
