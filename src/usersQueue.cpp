@@ -1,6 +1,6 @@
-#include "../include/usersQueue.h"
+#include "usersQueue.h"
 
-#include "../include/requestProcessing.h"
+#include "requestProcessing.h"
 
 std::mutex qmutex;
 std::condition_variable cv;

@@ -1,63 +1,86 @@
-#include "../include/session.h"
+#include "session.h"
 
-#include "../include/usersQueue.h"
+#include "usersQueue.h"
+#include "userStatusNotify.h"
 
 #include <iostream>
 
-Session::Session(boost::asio::io_context& io_context) : socket_(io_context) {
+Session::Session(boost::asio::io_context& io_context) : client_socket_(io_context) {
     _Logger = Logger::get_instance();
     _Config = Config::get_instance();
 
     _Config->write_handler_ptr = [this] (const boost::system::error_code& error, size_t bytes) {
-        this->handle_write(error, bytes); 
+        this->handleWrite(error, bytes); 
     };
 
     _UsersQueue = std::make_shared<UsersQueue>();
+    _UserStatusNotify = std::make_shared<UserStatusNotify>();
+
 }
 
-void Session::handle_disconnect(const boost::system::error_code& error) {
+void Session::handleDisconnect(const boost::system::error_code& error) {
     if (error == boost::asio::error::eof) {
-        _Logger->addServerLog(_Logger->info, "(session) Client disconnected gracefully", 2);
+        _Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Client disconnected gracefully", 2);
     }
     else if (error == boost::asio::error::connection_reset) {
-        _Logger->addServerLog(_Logger->info, "(session) Client connection reset", 2);
+        _Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Client connection reset", 2);
     }
     else {
-        _Logger->addServerLog(_Logger->info, "(session) Client connection error: " + error.message(), 2);
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Client connection error: " + error.message(), 2);
     }
+
+    _UserStatusNotify->notifyOffline(socket());
 
     boost::system::error_code ignore_ec;
-    socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignore_ec);
-    socket_.close(ignore_ec);
+    client_socket_.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ignore_ec);
+    client_socket_.close(ignore_ec);
 }
 
-void Session::handle_read(const boost::system::error_code& error, size_t bytes) {
+void Session::readHeader(const boost::system::error_code& error, size_t bytes) {
     if (!error) {
-        std::string data(data_, bytes);
+        msg_length_ = ntohl(msg_length_);
+        msg_data_.resize(msg_length_);
 
-        _UsersQueue->addUserToQueue(data, Session::socket());   
-
-        start();
+        boost::asio::async_read(client_socket_, boost::asio::buffer(msg_data_.data(), msg_length_),[self = shared_from_this()] (const boost::system::error_code& error, std::size_t bytes_transferred) {
+                self->readBody(error, bytes_transferred);
+            });
     }
     else {
-        handle_disconnect(error);
+        handleDisconnect(error);
     }
 }
 
-void Session::handle_write(const boost::system::error_code& error, size_t bytes) {
+void Session::readBody(const boost::system::error_code& error, size_t bytes) {
+    if (!error) {
+        std::string data(msg_data_.begin(), msg_data_.end());
+
+        _UsersQueue->addUserToQueue(data, client_socket_);
+
+        boost::asio::async_read(client_socket_, boost::asio::buffer(&msg_length_, sizeof(msg_length_)),[self = shared_from_this()] (const boost::system::error_code& error, std::size_t bytes_transferred) {
+                self->readHeader(error, bytes_transferred);
+            });
+    }
+    else {
+        handleDisconnect(error);
+    }
+}
+
+void Session::handleWrite(const boost::system::error_code& error, size_t bytes) {
     if (error) {
-        handle_disconnect(error);
+        handleDisconnect(error);
     }
 }
 
-Session::pointer Session::create(boost::asio::io_context& io_context) {
-	return pointer(new Session(io_context));
+std::shared_ptr<Session> Session::create(boost::asio::io_context& io_context) {
+	return std::shared_ptr<Session>(new Session(io_context));
 }
 
 boost::asio::ip::tcp::socket& Session::socket() {
-	return socket_;
+	return client_socket_;
 }
 
 void Session::start() {
-	socket_.async_read_some(boost::asio::buffer(data_, max_length), [this](const boost::system::error_code& error, std::size_t bytes_transferred) {handle_read(error, bytes_transferred); });
+    boost::asio::async_read(client_socket_, boost::asio::buffer(&msg_length_, sizeof(msg_length_)), [self = shared_from_this()] (const boost::system::error_code& error, std::size_t bytes_transferred) {
+            self->readHeader(error, bytes_transferred);
+        });
 }

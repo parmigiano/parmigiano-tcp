@@ -1,30 +1,101 @@
-syntax = "proto3";
+﻿syntax = "proto3";
 
 package ClientRequestStruct;
 
 message FileInfo {
-	string pame = 1; // rename FileName to name
-	string path = 2; // rename FilePath to path
-	string hash = 3; // rename Filehash to hash
+	string pame = 1;
+	string path = 2;
+	string hash = 3;
 }
 
-message FieldOfRequestData {
-	string key = 1;
-	string value = 2;
+message DirInfo {
+	string path = 1;
+}
+
+message NameOfMainExeFile {
+	string name = 1; 
+}
+
+// 0. Пакет уведомления сервера об активах пользователя
+message ClientActivePacket {
+	uint64 uid = 1; // мой uid
+    bool online = 2; // true/false
+}
+
+// 1. Приветственный пакет при первом подключении
+message ClientConnectedPacket {
+	uint64 uid = 1; // мой uid
+    bytes public_key = 2; // мой публичный ключ
+}
+
+// 2. Запрос асинхронного ключа шифрования от сервера (запрос идет когда пользователь открыл чат с другим пользователем)
+message RsaKeyRequestPacket {
+	uint64 uid = 1; // мой uid
+	uint64 chat_id = 2; // какой чат открыл - (+по ниму найти второго пользователя)
+    string algorithm = 3; // ?? "RSA-2048" | "X25519" | ...
+}
+
+// 3. Пакет когда пользователь начал печатать
+message ClientTypingPacket {
+	uint64 uid = 1; // мой uid
+    uint64 chat_id = 2; // в каком чате
+	bool is_typing = 3;
+}
+
+// 4. Пакет когда пользователь отправляет сообщение
+message ClientSendMessagePacket {
+	uint64 uid = 1; // мой uid
+    uint64 chat_id = 2; // в каком чате
+	string content = 3; // Само сообщение
+	string content_type = 4; // Тип сообщения 'text', 'image', ...
+}
+
+// 5. Пакет когда пользователь прочитал сообщение
+message ClientReadMessagePacket {
+	uint64 uid = 1; // кто прочитал - uid
+    uint64 chat_id = 2; // в каком чате
+	uint64 message_id = 3; // id прочитанного сообщения
+}
+
+// 6. Пакет когда пользователь изменил сообщение
+message ClientEditMessagePacket {
+	uint64 uid = 1; // мой uid
+    uint64 chat_id = 2; // в каком чате
+	uint64 message_id = 3; // id измененного сообщения
+	string content = 4; // Новое сообщение
+}
+
+// client pin message
+message ClientPinMessagePacket {
+	uint64 uid = 1; // мой uid
+    uint64 chat_id = 2; // в каком чате
+	uint64 message_id = 3; // id закрепленного сообщения
+}
+
+// 7. Пакет когда пользователь удалил сообщение
+message ClientDeleteMessagePacket {
+	uint64 uid = 1; // кто удалил uid
+    uint64 chat_id = 2; // в каком чате
+	uint64 message_id = 3; // id удаленного сообщения
+}
+
+message ClientInfo{
+	uint64 uid = 1;
 }
 
 message RequestInfo {
-	enum requestTypes{
+	enum requestTypes {
 		unknown = 0;
-		fileHashRequest = 1;
-		downloadFile = 2;
-		sendMessage = 3;
-		readMessage = 4;
-		editMessage = 5;
-		deleteMessage = 6;
-		userTyping = 7;
-		userOnlineStatus = 8;
-		getUnreadMessageCount = 9;
+		fileh_hash_request = 1;
+		download_file = 2;
+		send_message = 3;
+		read_message = 4;
+		edit_message = 5;
+		pin_message = 6;
+		delete_message = 7;
+		user_typing = 8;
+		user_online_status = 9;
+		get_unread_message_count = 10;
 	}
 
 	requestTypes type = 1;
@@ -34,8 +105,21 @@ message RequestInfo {
 message Request {
 	// PERMANENT NECESSARY FIELDS
 	RequestInfo requestInfo = 1; // important field of request info
-	repeated FieldOfRequestData requestData = 2; // main field/s of data
+	ClientInfo clientInfo = 2;
 
 	// OPTIONAL UPDATE FIELDS
-	repeated FileInfo fileInfo = 3; // usage while checking update and updating
+	// usage while checking update and updating
+	repeated FileInfo fileInfo = 3; 
+	repeated DirInfo dirInfo = 4;
+	NameOfMainExeFile nameOfMainExeFile = 5;
+
+	// hz(hui znaet) fields
+	ClientActivePacket clientActivePacket = 6;
+	ClientConnectedPacket clientConnectedPacket = 7;
+	RsaKeyRequestPacket rsaKeyRequestPacket = 8;
+	ClientTypingPacket clientTypingPacket = 9;
+	ClientSendMessagePacket clientSendMessagePacket = 10;
+	ClientReadMessagePacket clientReadMessagePacket = 11;
+	ClientEditMessagePacket clientEditMessagePacket = 12;
+	ClientDeleteMessagePacket clientDeleteMessagePacket = 13;
 }

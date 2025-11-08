@@ -3,37 +3,139 @@ syntax = "proto3";
 package ResponseStruct;
 
 message FileInfo {
-	string pame = 1; // rename FileName to name
-	string path = 2; // rename FilePath to path
-	string hash = 3; // rename Filehash to hash
+	string pame = 1;
+	string path = 2;
+	string hash = 3;
 }
 
 message DirInfo {
-	string path = 1; // rename DirPath to path
+	string path = 1;
 }
 
 message NameOfMainExeFile {
 	string name = 1; 
 }
 
-message ResponseInfo {
-	enum responseTypes{
+// client online/offline status
+message ClientActivePacket {
+	uint64 uid = 1; // user id
+    bool online = 2; // true/false
+}
+
+// packet for claim client public key
+message ClientConnectedPacket {
+	uint64 uid = 1; // user id
+    bytes public_key = 2; // public key
+}
+
+// send to cleint synchronous encryption key of a specific chat
+message RsaKeyPacket {
+	uint64 chat_id = 1; // which chat opened - (+find other user/s by chat_id)
+    string algorithm = 2; // a hui ego poymi nahuya ?? "RSA-2048" | "X25519" | ...
+}
+
+// client is typing
+message ClientTypingPacket {
+	uint64 uid = 1; // user id
+    uint64 chat_id = 2; // chatikus
+	bool is_typing = 3; // stop/start typing
+}
+
+// client is send messga to chat/group
+message ClientSendMessagePacket {
+	uint64 uid = 1; // user id
+    uint64 chat_id = 2; // chaaaaaaatik
+	string content = 3; // text of the message
+	string content_type = 4; // type of the message 'text', 'media', ...
+}
+
+// client read message
+message ClientReadMessagePacket {
+    uint64 chat_id = 1; // chaaaaat
+	uint64 message_id = 2; // id of readed message
+}
+
+// cleint edit message
+message ClientEditMessagePacket {
+    uint64 chat_id = 1; // в каком чате
+	uint64 message_id = 2; // id of edited message
+	string content = 3; // text that will be displayed after change
+}
+
+// client pin message
+message ClientPinMessagePacket {
+	uint64 uid = 1; // user id
+    uint64 chat_id = 2; // chaaat
+	uint64 message_id = 3; // id of pinned message
+}
+
+// client delete message
+message ClientDeleteMessagePacket {
+    uint64 chat_id = 1; // chaaat
+	uint64 message_id = 2; // id of deleted message
+}
+
+// out number of unread messages in the chat
+message ClientUnreadMessagesCountPacket {
+    uint64 chat_id = 1; // chaaaat
+	int32 count = 2; // number of unread messages
+}
+
+// using when server must disconnect client and notify
+message DisconnectNotifying {
+	enum types {
 		unknown = 0;
-		filesHashes = 1;
-		downloadFile = 2;
+		warn = 1;
+		error = 2;
+		tempBan = 3;
+		inactive = 4;
+		littleInfo = 5;
 	}
 
-	responseTypes type = 1;
+	types type = 1;
+	string description = 2;
+	int32 code = 3;
+}
+
+message ResponseInfo {
+	enum types {
+		unknown = 0;
+		file_hash_request = 1;
+		download_file = 2;
+		send_message = 3;
+		read_message = 4;
+		edit_message = 5;
+		pin_message = 6;
+		delete_message = 7;
+		user_typing = 8;
+		user_online_status = 9;
+		get_unread_message_count = 10;
+	}
+
+	types type = 1;
 }
 
 // MAIN
 message Response {
 	// PERMANENT NECESSARY FIELDS
 	ResponseInfo responseInfo = 1; // important field of request info
-
+	
 	// OPTIONAL UPDATE FIELDS
+	DisconnectNotifying disconnectNotifying = 2;
+
 	// usage while checking update and updating
-	repeated FileInfo fileInfo = 2; 
-	repeated DirInfo dirInfo = 3;
-	NameOfMainExeFile nameOfMainExeFile = 4;
+	repeated FileInfo fileInfo = 3; 
+	repeated DirInfo dirInfo = 4;
+	NameOfMainExeFile nameOfMainExeFile = 5;
+
+	// hz(hui znaet) fields
+	ClientActivePacket clientActivePacket = 6;
+	ClientConnectedPacket clientConnectedPacket = 7;
+	RsaKeyPacket RsaKeyPacket = 8;
+	ClientTypingPacket clientTypingPacket = 9;
+	ClientSendMessagePacket clientSendMessagePacket = 10;
+	ClientReadMessagePacket clientReadMessagePacket = 11;
+	ClientEditMessagePacket clientEditMessagePacket = 12;
+	ClientDeleteMessagePacket clientDeleteMessagePacket = 13;
+
 }

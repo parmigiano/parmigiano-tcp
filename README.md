@@ -7,15 +7,12 @@
 - `TCP/IP` stack
 - `C++` programming language
 
----
 
 ## Quick start
 
 A quick start that will help you get the server up and running quickly
 
----
-
-### Cloning into github
+## Cloning into github
 
 Clones an open-source repository from github
 
@@ -23,9 +20,7 @@ Clones an open-source repository from github
 git clone https://github.com/parmigiano/parmigiano-tcp.git
 ```
 
----
-
-### Change directory to parmigiano-tcp
+## Change directory to parmigiano-tcp
 
 After copying the source files, you need to navigate to the folder containing them in order to continue working
 
@@ -33,9 +28,7 @@ After copying the source files, you need to navigate to the folder containing th
 cd parmigiano-tcp
 ```
 
----
-
-### Create directory build
+## Create directory build
 
 Creating a `build` folder that will contain different types of builds
 
@@ -43,9 +36,7 @@ Creating a `build` folder that will contain different types of builds
 mkdir build && cd build
 ```
 
----
-
-### Create subdirectory nmake
+## Create subdirectory nmake
 
 A subdirectory where the nmake-generated files will be stored
 
@@ -53,9 +44,7 @@ A subdirectory where the nmake-generated files will be stored
 mkdir nmake && cd nmake
 ```
 
----
-
-### Generating with nmake
+## Generating with nmake
 
 Generating build files for nmake
 
@@ -63,9 +52,13 @@ Generating build files for nmake
 cmake -G "NMake Makefiles" ../..
 ```
 
----
+If error occurs when generating files. which reports that PostgreSQL could not be found, you must specify full path to it as shown below
 
-### Build project
+```cmd
+cmake -G "NMake Makefiles" ../.. -DPostgreSQL_ROOT="path_to_PostgreSql/version"
+```
+
+## Build project
 
 Will building all file (libraries and project). Takes up more memory and takes longer to build
 
