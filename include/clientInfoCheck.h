@@ -26,4 +26,4 @@ public:
 	bool checkInfoFullness(ClientRequestStruct::Request& accepted_request, boost::asio::ip::tcp::socket& client_socket);
 };
 
-#endif 
+#endif

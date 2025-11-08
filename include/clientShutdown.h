@@ -14,9 +14,9 @@ class SendResponse;
 class СlientShutdown {
 public:
 	enum disconnectType {
-		warn, 
-		error, 
-		tempBan, 
+		warn,
+		error,
+		tempBan,
 		inactive,
 		littleInfo
 	};
@@ -47,4 +47,4 @@ public:
 	//void disconnectProcessing(boost::asio::ip::tcp::socket& client_socket);
 };
 
-#endif 
+#endif
