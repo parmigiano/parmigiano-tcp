@@ -10,7 +10,7 @@ Session::Session(boost::asio::io_context& io_context) : client_socket_(io_contex
     _Config = Config::get_instance();
 
     _Config->write_handler_ptr = [this] (const boost::system::error_code& error, size_t bytes) {
-        this->handleWrite(error, bytes); 
+        this->handleWrite(error, bytes);
     };
 
     _UsersQueue = std::make_shared<UsersQueue>();

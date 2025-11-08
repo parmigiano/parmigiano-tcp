@@ -11,7 +11,7 @@ SessionLive::SessionLive() {
     _SessionManager = SessionManager::get_instance();
 
 	//_SendResponse = std::make_shared<SendResponse>();
-	_ClientShutdown = std::make_shared<ÑlientShutdown>();
+	_ClientShutdown = std::make_shared<Ð¡lientShutdown>();
 }
 
 void SessionLive::checkActivity() {

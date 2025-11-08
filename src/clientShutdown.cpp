@@ -4,7 +4,7 @@
 
 #include "vector"
 
-ClientShutdown::ClientShutdown() {
+СlientShutdown::СlientShutdown() {
 	_Logger = Logger::get_instance();
 	_Config = Config::get_instance();
     _SessionManager = SessionManager::get_instance();
@@ -12,39 +12,39 @@ ClientShutdown::ClientShutdown() {
 	_SendResponse = std::make_shared<SendResponse>();
 }
 
-void ClientShutdown::disconnectCommon(boost::asio::ip::tcp::socket& client_socket) {
+void СlientShutdown::disconnectCommon(boost::asio::ip::tcp::socket& client_socket) {
     client_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
     client_socket.close();
 }
 
-void ClientShutdown::disconnect(uint64_t& UID) {
+void СlientShutdown::disconnect(uint64_t& UID) {
     boost::asio::ip::tcp::socket& client_socket = _SessionManager->getSessionSocket(UID);
 
     disconnectCommon(client_socket);
 }
 
-void ClientShutdown::disconnect(boost::asio::ip::tcp::socket& client_socket) {
+void СlientShutdown::disconnect(boost::asio::ip::tcp::socket& client_socket) {
     disconnectCommon(client_socket);
 }
 
-void ClientShutdown::notifyCommon(boost::asio::ip::tcp::socket& client_socket, std::string& description, short int& code, disconnectType& disconnect_type) {
+void СlientShutdown::notifyCommon(boost::asio::ip::tcp::socket& client_socket, std::string& description, short int& code, disconnectType& disconnect_type) {
     _SendResponse->setDisconnectDescription(description);
     _SendResponse->setDisconnectCode(code);
 
     switch (disconnect_type) {
-    case ClientShutdown::error:
+    case СlientShutdown::error:
         _SendResponse->setDisonnectType(_SendResponse->error);
         break;
-    case ClientShutdown::warn:
+    case СlientShutdown::warn:
         _SendResponse->setDisonnectType(_SendResponse->warn);
         break;
-    case ClientShutdown::tempBan:
+    case СlientShutdown::tempBan:
         _SendResponse->setDisonnectType(_SendResponse->tempBan);
         break;
-    case ClientShutdown::inactive:
+    case СlientShutdown::inactive:
         _SendResponse->setDisonnectType(_SendResponse->inactive);
         break;
-    case ClientShutdown::littleInfo:
+    case СlientShutdown::littleInfo:
         _SendResponse->setDisonnectType(_SendResponse->inactive);
         break;
     default:
@@ -55,17 +55,17 @@ void ClientShutdown::notifyCommon(boost::asio::ip::tcp::socket& client_socket, s
     _SendResponse->sendResponse(client_socket);
 }
 
-void ClientShutdown::notify(uint64_t& UID, std::string description, short int code, disconnectType& disconnect_type) {
+void СlientShutdown::notify(uint64_t& UID, std::string description, short int code, disconnectType& disconnect_type) {
     boost::asio::ip::tcp::socket& client_socket = _SessionManager->getSessionSocket(UID);
 
     notifyCommon(client_socket, description, code, disconnect_type);
 }
 
-void ClientShutdown::notify(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType& disconnect_type) {
+void СlientShutdown::notify(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType& disconnect_type) {
     notifyCommon(client_socket, description, code, disconnect_type);
 }
 
-void ClientShutdown::disconnectClientByReason(uint64_t& UID, std::string description, short int code, disconnectType disconnect_type) {
+void СlientShutdown::disconnectClientByReason(uint64_t& UID, std::string description, short int code, disconnectType disconnect_type) {
     try {
         notify(UID, description, code, disconnect_type);
         disconnect(UID);
@@ -78,7 +78,7 @@ void ClientShutdown::disconnectClientByReason(uint64_t& UID, std::string descrip
     }
 }
 
-void ClientShutdown::disconnectClientByReason(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType disconnect_type) {
+void СlientShutdown::disconnectClientByReason(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType disconnect_type) {
     try {
         disconnect(client_socket);
     }

@@ -6,7 +6,7 @@ ClientInfoCheck::ClientInfoCheck() {
     _Logger = Logger::get_instance();
     //_SessionManager = SessionManager::get_instance();
 
-    _ClientShutdown = std::make_shared<ÑlientShutdown>();
+    _ClientShutdown = std::make_shared<Ð¡lientShutdown>();
 }
 
 bool ClientInfoCheck::checkUID(uint64_t& UID, boost::asio::ip::tcp::socket& client_socket) {

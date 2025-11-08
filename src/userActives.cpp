@@ -7,7 +7,7 @@ UserActives::UserActives() {
 }
 
 void UserActives::initStatements() {
-    _PreparedStatementManager->registerStatement("getOnlineStatusByUID", "FROM user_actives SELECT online WHERE user_uid = $1");
+    _PreparedStatementManager->registerStatement("getOnlineStatusByUID", "SELECT user_actives FROM online WHERE user_uid = $1");
 
     _PreparedStatementManager->registerStatement("setOnlineStatusByUID", "UPDATE user_actives SET online = $1 WHERE user_uid = $2");
 }
