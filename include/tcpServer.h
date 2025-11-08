@@ -3,8 +3,8 @@
 
 #define ASIO_STANDALONE
 
-#include "../include/logger.h"
-#include "../include/config.h"
+#include "logger.h"
+#include "config.h"
 
 #include <boost/asio.hpp>
 #include <memory>
@@ -16,10 +16,12 @@ private:
 	Logger* _Logger;
 	Config* _Config;
 
-	std::shared_ptr<Session> _Session;
+	std::shared_ptr<Session> Session_;
 
 	boost::asio::io_context& io_context_;
 	boost::asio::ip::tcp::acceptor acceptor_;
+
+	const std::string MODULE_NAME_ = "(TcpServer)";
 public:
 	TcpServer(boost::asio::io_context& io_context, int port);
 	~TcpServer() = default;

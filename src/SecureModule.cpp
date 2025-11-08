@@ -1,6 +1,6 @@
-#include "../include/SecureModule.h"
+#include "SecureModule.h"
 
-#include "../include/sendResponse.h"
+#include "sendResponse.h"
 
 SecureModule::SecureModule() {
 	_Logger = Logger::get_instance();

@@ -1,8 +1,8 @@
 #ifndef SECUREMODULE_H
 #define SECUREMODULE_H
 
-#include "../include/logger.h"
-#include "../include/config.h"
+#include "logger.h"
+#include "config.h"
 
 #include <memory>
 
@@ -17,8 +17,6 @@ private:
 public:
 	SecureModule();
 	~SecureModule() = default;
-
-
 };
 
 #endif 

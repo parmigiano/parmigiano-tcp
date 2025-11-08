@@ -1,7 +1,7 @@
 #ifndef SESSIONMANAGER_H
 #define SESSIONMANAGER_H
 
-#include "../include/logger.h"
+#include "logger.h"
 
 #include <string>
 #include <vector>
@@ -25,14 +25,16 @@ class SessionManager {
 private:
 	Logger* _Logger;
 
-	static SessionManager* instance_ptr;
-	static std::mutex instance_mtx;
-	std::mutex mtx;
+	static SessionManager* instance_ptr_;
+	static std::mutex instance_mtx_;
+	std::mutex mtx_;
 
-	std::map <std::string, SessionInfo> _UsersIdentify;
-	std::vector<std::string> listOfUID;
+	std::map<uint64_t, SessionInfo> users_identify_by_uid_;
+	std::vector<uint64_t> list_of_uid_;
 
-	bool sessionExist(std::string& UID);
+	bool sessionExist(uint64_t& UID);
+
+	const std::string MODULE_NAME_ = "(SessionManager)";
 public:
 	SessionManager();
 	SessionManager(const SessionManager&) = delete;
@@ -40,13 +42,16 @@ public:
 
 	static SessionManager* get_instance();
 
-	void assigningSession(boost::asio::ip::tcp::socket& socket, std::string& UID); // adding new session
-	void updateSocket(boost::asio::ip::tcp::socket& socket, std::string& UID);
-	void updateLastActivity(std::string& UID);
-	std::chrono::time_point<std::chrono::system_clock> getSessionLastActivity(std::string& UID);
-	boost::asio::ip::tcp::socket* getSessionSocket(std::string& UID);
-	std::vector<std::string> getListOfUID();
-	void removeClientFromTable(std::string& UID);
+	void assigningSession(boost::asio::ip::tcp::socket& client_socket, uint64_t& UID); // adding new session
+
+	void updateSocket(boost::asio::ip::tcp::socket& client_socket, uint64_t& UID);
+	void updateLastActivity(uint64_t& UID);
+
+	std::chrono::time_point<std::chrono::system_clock> getSessionLastActivity(uint64_t& UID);
+	boost::asio::ip::tcp::socket& getSessionSocket(uint64_t& UID);
+	std::vector<uint64_t> getListOfUID();
+
+	void removeClientFromTable(uint64_t& UID);
 };
 
 #endif 

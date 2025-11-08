@@ -1,14 +1,14 @@
 #ifndef SESSIONLIVE_H
 #define SESSIONLIVE_H
 
-#include "../include/logger.h"
-#include "../include/config.h"
-#include "../include/sessionManager.h"
+#include "logger.h"
+#include "config.h"
+#include "sessionManager.h"
 
 #include <memory>
 #include <chrono>
 
-class ForcedClientShutdown;
+class ÑlientShutdown;
 //class SendResponse;
 
 class SessionLive {
@@ -18,7 +18,9 @@ private:
 	SessionManager* _SessionManager;
 
 	//std::shared_ptr<SendResponse> _SendResponse;
-	std::shared_ptr<ForcedClientShutdown> _ForcedClientShutdown;
+	std::shared_ptr<ÑlientShutdown> _ClientShutdown;
+
+	const std::string MODULE_NAME_ = "(SessionLive)";
 public:
 	SessionLive();
 	~SessionLive() = default;

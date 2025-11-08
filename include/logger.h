@@ -1,29 +1,38 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+#include <config.h>
+
 #include <string>
 #include <fstream>
 #include <mutex>
 
 class Logger {
 public:
-	enum logType { info, warn, error };
+	enum logType { 
+		info, 
+		warn, 
+		error 
+	};
 private:
-	static Logger* instance_ptr;
-	static std::mutex mtx;
+	Config* _Config;
 
-	std::ofstream file;
+	static Logger* instance_ptr_;
+	static std::mutex mtx_;
+	std::ofstream file_;
 
-	// logger configuration
-	std::string serverLogsDir = "./log";
-
-	std::string getActualTime();
-	int logFilesExist();
-	int checkLogDirectoryExist();
 	std::string definitionLogType(logType);
-	int fileLog(logType, std::string log);
-	int consoleLog(logType, std::string log);
+	std::string getActualTime();
 
+	void fileReset(std::string filepath);
+	void fileLog(logType, std::string log_str, std::string filepath);
+	void consoleLog(logType, std::string log_str);
+	void log(logType log_type, std::string& log_str, unsigned short int& logging_flag, std::string filepath);
+
+	void checkDirExist(std::string filepath);
+
+	const std::string MODULE_NAME_ = "(Logger)";
+	bool is_init_ = false;
 public:
 	Logger();
 	Logger(const Logger&) = delete;
@@ -31,9 +40,11 @@ public:
 
 	static Logger* get_instance();
 
-	int initializeLogger();
-	void addServerLog(logType, std::string log, unsigned short int loggingFlag); // types - info/warn/error ||| 0: only file log | 1: only console log | 2: file and console log
-	void addSessionLog(logType, std::string log, unsigned short int loggingFlag, std::string sessionID); // sessionID for unique file name. Logs with session is store in other dir
+	void initialize();
+	inline bool isInitalized() const;
+
+	void addServerLog(logType, std::string log_str, unsigned short int logging_flag);
+	void addSessionLog(logType, std::string& UID, std::string log_str, unsigned short int logging_flag);
 };
 
 #endif 

@@ -1,8 +1,10 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "../include/logger.h"
-#include "../include/config.h"
+#include "logger.h"
+#include "config.h"
+
+#include "database.h" // temp
 
 #include <memory>
 #include <boost/asio.hpp>
@@ -16,6 +18,7 @@ class AppControl {
 private:
 	Logger* _Logger;
 	Config* _Config;
+	Database* _Database;
 
 	std::shared_ptr<TcpServer> _TcpServer;
 	std::shared_ptr<UsersQueue> _UsersQueue;

@@ -1,8 +1,8 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include "../include/logger.h"
-#include "../include/config.h"
+#include "logger.h"
+#include "config.h"
 
 #include <memory>
 #include <functional>
@@ -12,9 +12,9 @@
 
 class Task {
 private:
-	std::function<void()> func;
-	std::chrono::seconds interval;
-	std::chrono::time_point<std::chrono::system_clock> last_run;
+	std::function<void()> func_;
+	std::chrono::seconds interval_;
+	std::chrono::time_point<std::chrono::system_clock> last_run_;
 public:
 	Task(std::function<void()> f, int interval_minutes);
 	~Task() = default;
@@ -28,10 +28,12 @@ private:
 	Config* _Config;
 	Logger* _Logger;
 
-	std::vector <std::shared_ptr<Task>> tasksList;
-	bool running = false;
+	std::vector<std::shared_ptr<Task>> tasks_list_;
 
 	void handleTasks();
+
+	bool running_ = false;
+	const std::string MODULE_NAME_ = "(Scheduler)";
 public:
 	Scheduler();
 	~Scheduler() = default;

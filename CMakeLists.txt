@@ -10,6 +10,11 @@ file(MAKE_DIRECTORY ${GENERATED_PROTO_DIR})
 
 include(FetchContent)
 
+#set(PostgreSQL_INCLUDE_DIR "C:/Program Files/PostgreSQL/18/include")
+#set(PostgreSQL_LIBRARY "C:/Program Files/PostgreSQL/18/lib/libpq.lib")
+
+find_package(PostgreSQL REQUIRED)
+
 # get and build protocol buffers
 FetchContent_Declare(
   protobuf
@@ -30,7 +35,15 @@ FetchContent_Declare(
 set(BOOST_INCLUDE_LIBRARIES system asio)
 set(BOOST_ENABLE_CMAKE ON)
 
-FetchContent_MakeAvailable(protobuf boost)
+FetchContent_Declare(
+    libpqxx
+    GIT_REPOSITORY https://github.com/jtv/libpqxx.git
+    GIT_TAG 7.10.1
+)
+
+set(PQXX_LIBRARIES pqxx_static)
+
+FetchContent_MakeAvailable(protobuf boost libpqxx)
 
 include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
 
@@ -54,6 +67,7 @@ protobuf_generate(
 target_include_directories(${EXECUTABLE_NAME} PRIVATE # replace #include "../include/ConnectionManager.h" to #include "ConnectionManager.h"
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 	${GENERATED_PROTO_DIR}
+    #${PostgreSQL_INCLUDE_DIR}
 )
 
 target_link_libraries(${EXECUTABLE_NAME} # link protobuf and boost with project
@@ -61,6 +75,8 @@ target_link_libraries(${EXECUTABLE_NAME} # link protobuf and boost with project
 	protobuf::libprotobuf
 	Boost::asio 
 	Boost::system
+    pqxx
+    #${PostgreSQL_LIBRARY}
 ) 
 
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES

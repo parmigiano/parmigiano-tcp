@@ -1,4 +1,14 @@
-serverPort=5462
-logDir=./log
-logMode=develop
-sessionLiveTime=1
+# develop/production
+mode=develop
+
+# general settings
+server_port=5462
+session_live_time=10
+log_server_subdir=server
+log_session_subdir=sessions
+
+# develop vars
+log_dir_develop=./log
+
+# production vars
+log_dir_production=/root/parmigiano-tcp/log

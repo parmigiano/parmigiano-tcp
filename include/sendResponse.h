@@ -1,8 +1,9 @@
 #ifndef SENDRESPONSE_H
 #define SENDRESPONSE_H
 
-#include "../include/logger.h"
-#include "../include/config.h"
+#include "logger.h"
+#include "config.h"
+
 #include "ClientRequestStruct.pb.h"
 #include "ResponseStruct.pb.h"
 
@@ -11,30 +12,57 @@
 #include <memory>
 #include <boost/asio.hpp>
 
-class Session;
+//class Session;
 
 class SendResponse {
 public:
-	enum disconnectType { warn, error, tempBan, inactive, unknown };
+	enum disconnectType {
+		warn,
+		error,
+		tempBan,
+		inactive,
+		littleInfo
+	};
+
+	enum responseType { 
+		file_hash_request, 
+		download_file, 
+		send_message, 
+		read_message, 
+		edit_message, 
+		pin_message, 
+		delete_message, 
+		user_typing, 
+		user_online_status, 
+		get_unread_message_count
+	};
+
 private:
 	Logger* _Logger;
 	Config* _Config;
 
 	std::shared_ptr<ResponseStruct::Response> _Response;
-	std::shared_ptr<Session> _Session;
+
+	void clearResponse();
+
+	const std::string MODULE_NAME_ = "(SendResponse)";
 public:
 	SendResponse();
 	~SendResponse() = default;
 
-	void setReponseType(std::string responseType);
-	void setDisonnectType(disconnectType);
-	void setDisconnectDescription(std::string description);
-	void setDisconnectCode(short int code);
-	void clearResponse();
-	std::ifstream openFile(std::string filepath, unsigned int fileSize);
+	void setReponseType(responseType response_type);
 
-	int sendResponse(boost::asio::ip::tcp::socket& socket);
-	int sendFile(std::string filePath, boost::asio::ip::tcp::socket& socket);
+	void setDisonnectType(disconnectType disconnect_type);
+	void setDisconnectDescription(std::string& description);
+	void setDisconnectCode(short int& code);
+
+	void setClientActiveUID(uint64_t& UID);
+	void setClientActiveOnlineStatus(bool status);
+
+	std::ifstream openFile(std::string& filepath, unsigned int& file_size);
+
+	void sendResponse(boost::asio::ip::tcp::socket& client_socket);
+	void sendFile(std::string& filepath, boost::asio::ip::tcp::socket& client_socket);
 };
 
 #endif 

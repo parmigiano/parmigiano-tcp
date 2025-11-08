@@ -7,12 +7,13 @@
 
 #define ASIO_STANDALONE
 
-#include "../include/logger.h"
-#include "../include/config.h"
+#include "logger.h"
+#include "config.h"
 
 #include <boost/asio.hpp>
 
 class UsersQueue;
+class UserStatusNotify;
 
 class Session : public std::enable_shared_from_this<Session> {
 private:
@@ -20,22 +21,29 @@ private:
 	Config* _Config;
 
 	std::shared_ptr<UsersQueue> _UsersQueue;
+	std::shared_ptr<UserStatusNotify> _UserStatusNotify;
 
-	void handle_disconnect(const boost::system::error_code& error);
-	void handle_read(const boost::system::error_code& error, size_t bytes);
+	void handleDisconnect(const boost::system::error_code& error);
+	void readHeader(const boost::system::error_code& error, size_t bytes);
+	void readBody(const boost::system::error_code& error, size_t bytes);
 
-	boost::asio::ip::tcp::socket socket_;
-	enum { max_length = 1024 };
-	char data_[max_length];
+	boost::asio::ip::tcp::socket client_socket_;
+	/*enum { max_length = 1024 };
+	char data_[max_length];*/
+
+	uint32_t msg_length_; 
+	std::vector<char> msg_data_;
+
+	const std::string MODULE_NAME_ = "(Session)";
 public:
 	Session(boost::asio::io_context& io_context);
 	~Session() = default;
 
-	typedef std::shared_ptr<Session> pointer;
+	//typedef std::shared_ptr<Session> pointer;
 
-	pointer create(boost::asio::io_context& io_context);
+	std::shared_ptr<Session> create(boost::asio::io_context& io_context);
 	boost::asio::ip::tcp::socket& socket();
-	void handle_write(const boost::system::error_code& error, size_t bytes);
+	void handleWrite(const boost::system::error_code& error, size_t bytes);
 	void start();
 };
 

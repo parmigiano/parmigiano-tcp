@@ -52,6 +52,12 @@ Generating build files for nmake
 cmake -G "NMake Makefiles" ../..
 ```
 
+If error occurs when generating files. which reports that PostgreSQL could not be found, you must specify full path to it as shown below
+
+```cmd
+cmake -G "NMake Makefiles" ../.. -DPostgreSQL_ROOT="path_to_PostgreSql/version"
+```
+
 ## Build project
 
 Will building all file (libraries and project). Takes up more memory and takes longer to build
