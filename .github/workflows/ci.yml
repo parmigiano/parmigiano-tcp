@@ -43,6 +43,7 @@ jobs:
   deploy_prod:
     name: Deploy production
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     # needs: [tcp_server_build]
     if: github.ref == 'refs/heads/main'
     steps:
