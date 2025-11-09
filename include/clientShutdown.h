@@ -11,7 +11,7 @@
 
 class SendResponse;
 
-class СlientShutdown {
+class ClientShutdown {
 public:
 	enum disconnectType {
 		warn, 
@@ -39,8 +39,8 @@ private:
 
 	const std::string MODULE_NAME_ = "(ClientShutdown)";
 public:
-	СlientShutdown();
-	~СlientShutdown() = default;
+	ClientShutdown();
+	~ClientShutdown() = default;
 
 	void disconnectClientByReason(uint64_t& UID, std::string description, short int code, disconnectType disconnect_type);
 	void disconnectClientByReason(boost::asio::ip::tcp::socket& client_socket, std::string description, short int code, disconnectType disconnect_type);
