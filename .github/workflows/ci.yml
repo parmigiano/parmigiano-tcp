@@ -56,7 +56,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: 22
-          timeout: 4000
+          timeout: 60m
           script: |
             set -e
 
