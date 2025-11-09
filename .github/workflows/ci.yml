@@ -63,7 +63,7 @@ jobs:
             git checkout main
             git pull origin main
 
-            cd /root/parmigiano-tcp/build
+            cd /root/parmigiano-tcp/scripts
             bash pre-deploy
 
             cd /root/parmigiano-tcp/build
