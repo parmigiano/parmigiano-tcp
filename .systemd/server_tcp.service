@@ -3,7 +3,7 @@ Description=C++ TCP Server
 After=network.target
 
 [Service]
-ExecStart=/root/parmigiano-tcp/executable/ServerMain
+ExecStart=/root/parmigiano-tcp/ServerMain
 WorkingDirectory=/root/parmigiano-tcp
 Restart=always
 RestartSec=5s
