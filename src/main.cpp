@@ -4,8 +4,8 @@
 #include "scheduler.h"
 #include "usersQueue.h"
 
-#include <iostream> // fu ubrat'
-#include <map>
+//#include <iostream> // fu ubrat'
+//#include <map>
 #include <thread>
 
 int main() {
@@ -16,7 +16,7 @@ int main() {
 
 	_appControl->startApp();
 
-	system("pause");
+	//system("pause");
 
 	return 0;
 }

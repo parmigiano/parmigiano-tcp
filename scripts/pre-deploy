@@ -1,0 +1,9 @@
+#!/bin/bash
+
+set -e
+
+HOME="$(git rev-parse --show-toplevel)"
+
+cd "$HOME"
+
+sed -i 's/^mode=develop/mode=production/' Config.txt

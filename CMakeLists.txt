@@ -87,21 +87,10 @@ set_target_properties(${EXECUTABLE_NAME} PROPERTIES
 add_definitions(-D_WIN32_WINNT=0x0601)
 
 add_custom_target(copy_exe ALL
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/executable
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND ${CMAKE_COMMAND} -E copy
         $<TARGET_FILE:${EXECUTABLE_NAME}>
-        ${CMAKE_CURRENT_SOURCE_DIR}/executable/$<TARGET_FILE_NAME:${EXECUTABLE_NAME}>
+        ${CMAKE_CURRENT_SOURCE_DIR}/$<TARGET_FILE_NAME:${EXECUTABLE_NAME}>
     DEPENDS ${EXECUTABLE_NAME}
     COMMENT "Copying executable to folder"
 )
-
-add_custom_target(dist
-    COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_CURRENT_SOURCE_DIR}/executable
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/executable
-    COMMAND ${CMAKE_COMMAND} -E copy
-        $<TARGET_FILE:${EXECUTABLE_NAME}>
-        ${CMAKE_CURRENT_SOURCE_DIR}/executable/
-    COMMENT "Creating clean distribution"
-)
-
-add_dependencies(dist ${EXECUTABLE_NAME})
