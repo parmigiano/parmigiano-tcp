@@ -67,6 +67,8 @@ jobs:
             bash pre-deploy
 
             cd /root/parmigiano-tcp/build
+            rm -rf * 
+            cmake ..
             ninja -j$(nproc)
 
             cd /root/parmigiano-tcp/scripts
