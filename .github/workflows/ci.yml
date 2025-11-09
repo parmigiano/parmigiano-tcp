@@ -15,6 +15,7 @@ jobs:
   # tcp_server_build:
   #   name: Build TCP server
   #   runs-on: ubuntu-latest
+  #   timeout-minutes: 60
   #   steps:
   #     - uses: actions/checkout@v4
   #       with:
@@ -55,6 +56,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           password: ${{ secrets.VPS_PASSWORD }}
           port: 22
+          timeout: 4000
           script: |
             set -e
 
@@ -69,7 +71,7 @@ jobs:
 
             cd /root/parmigiano-tcp/build
             rm -rf * 
-            cmake ..
+            cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
             ninja -j$(nproc)
 
             cd /root/parmigiano-tcp/scripts
