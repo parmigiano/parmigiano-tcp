@@ -66,12 +66,6 @@ Will building all file (libraries and project). Takes up more memory and takes l
 nmake
 ```
 
-**Recomended**. Ready-made executable file will be compiled. It will be packed in the `executable` folder in the source files
-
-```cmd
-nmake dist
-```
-
 Clean build. You'll need to rebuild using nmake
 
 ```cmd

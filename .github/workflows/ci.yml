@@ -64,6 +64,9 @@ jobs:
             git pull origin main
 
             cd /root/parmigiano-tcp/build
+            bash pre-deploy
+
+            cd /root/parmigiano-tcp/build
             ninja -j$(nproc)
 
             cd /root/parmigiano-tcp/scripts
