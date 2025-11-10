@@ -1,10 +1,9 @@
-#ifndef MAIN_H
-#define MAIN_H
+#pragma once
 
 #include "logger.h"
 #include "config.h"
 
-#include "database.h" // temp
+#include "database/database.h" // temp
 
 #include <memory>
 #include <boost/asio.hpp>
@@ -32,5 +31,3 @@ public:
 
 	int startApp();
 };
-
-#endif 

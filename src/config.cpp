@@ -75,7 +75,8 @@ void Config::parseFrom(fileTypes type) {
                 continue;
             }
 
-            std::string key = line.substr(0, line.find("=")), value = line.substr(line.find("=") + 1, line.back());
+            std::string key = line.substr(0, line.find("="));
+            std::string value = line.substr(line.find("=") + 1);
 
             if (toLower(key).find("develop") != std::string::npos) {
                 temp_vars_develop_[key.substr(0, toLower(key).find("_develop"))] = value;
@@ -89,6 +90,7 @@ void Config::parseFrom(fileTypes type) {
 
             if (line.find("=") == std::string::npos || value.empty()) { // key in config isnt init 
                 throw std::runtime_error("Key: \"" + key + "\" isnt initialize. Please enter value like: \"" + key + "=value\"");
+                //continue;
             }
 
             configuration_vars_[key] = value;
@@ -98,11 +100,11 @@ void Config::parseFrom(fileTypes type) {
     }
     catch (const std::exception& error) {
         //_Logger->addServerLog(_Logger->error, module_name + " " + std::string(error.what()), 2);
-        exit(1);
+        //exit(1);
     }
     catch (...) {
         //_Logger->addServerLog(_Logger->error, module_name + " catch unknw error", 2);
-        exit(1);
+        //exit(1);
     }
 }
 

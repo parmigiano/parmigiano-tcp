@@ -1,8 +1,8 @@
 #include "main.h"
 
-#include "tcpServer.h"
+#include "session/tcpServer.h"
 #include "scheduler.h"
-#include "usersQueue.h"
+#include "session/usersQueue.h"
 
 //#include <iostream> // fu ubrat'
 //#include <map>
@@ -16,7 +16,7 @@ int main() {
 
 	_appControl->startApp();
 
-	//system("pause");
+	system("pause");
 
 	return 0;
 }
@@ -46,9 +46,10 @@ int AppControl::startApp() {
 
 	_Database->initialize(
 		" password=" + _Config->configuration_vars_["DB_PASSWORD"] +
-		" dbname=" + _Config->configuration_vars_["DB_USER"] +
+		" dbname=" + _Config->configuration_vars_["DB_NAME"] +
 		" port=" + _Config->configuration_vars_["DB_PORT"] +
-		" host=" + _Config->configuration_vars_["DB_ADDRESS"]
+		" host=" + _Config->configuration_vars_["DB_ADDRESS"] +
+		" user=" + _Config->configuration_vars_["DB_USER"]
 	);
 
 	io_context.run();

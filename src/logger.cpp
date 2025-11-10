@@ -40,7 +40,7 @@ std::string Logger::getActualTime() {
 }
 
 void Logger::fileReset(std::string filepath) {
-
+	std::fstream file(filepath, std::ios::out);
 }
 
 void Logger::fileLog(logType log_type, std::string log, std::string filepath) {
@@ -77,7 +77,7 @@ void Logger::initialize() {
 		checkDirExist(_Config->configuration_vars_["log_dir"] + "/" + _Config->configuration_vars_["log_server_subdir"]);
 		checkDirExist(_Config->configuration_vars_["log_dir"] + "/" + _Config->configuration_vars_["log_session_subdir"]);
 
-		//fileReset(_Config->configuration_vars_["log_dir"] + "/" + _Config->configuration_vars_["log_server_subdir"] + "/latest.txt");
+		fileReset(_Config->configuration_vars_["log_dir"] + "/" + _Config->configuration_vars_["log_server_subdir"] + "/latest.txt");
 
 		is_init_ = true;
 	}
