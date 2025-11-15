@@ -13,6 +13,8 @@ protected:
 	Database* _Database;
 	Logger* _Logger;
 	PreparedStatementManager* _PreparedStatementManager;
+
+	std::shared_ptr<pqxx::connection> _Connection;
 public:
 	BaseTable();
 	virtual ~BaseTable() = default;

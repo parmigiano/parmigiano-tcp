@@ -1,6 +1,7 @@
 #pragma once
 
 #include "session/sessionManager.h"
+#include "connect_processing/responseTypeEnum.h"
 #include "logger.h"
 
 #include <memory>
@@ -20,8 +21,6 @@ private:
 	std::shared_ptr<SendResponse> _SendResponse;
 	std::shared_ptr<ChatMembersTable> _ChatMembers;
 	std::shared_ptr<UserActivesTable> _UserActives;
-
-	uint64_t getUID(boost::asio::ip::tcp::socket& client_sock);
 
 	const std::string MODULE_NAME_ = "(UserStatusService)";
 public:

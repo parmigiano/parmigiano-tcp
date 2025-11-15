@@ -17,7 +17,7 @@ private:
 	Logger* _Logger;
 	PreparedStatementManager* _PreparedStatementManager;*/
 
-	const std::string MODULE_NAME_ = "(Table Chats)";
+	const std::string MODULE_NAME_ = "(Table ChatMembers)";
 public:
 	ChatMembersTable();
 	~ChatMembersTable() = default;
@@ -26,7 +26,8 @@ public:
 	void initStatements() override;
 	 
 	// getters;
-	std::vector<uint64_t> getListOfInterlocutors(uint64_t& uid);
+	std::vector<uint64_t> getListOfAllInterlocutors(uint64_t& UID);
+	std::vector<uint64_t> getListOfChatMembers(uint64_t& UID, uint64_t& chat_id);
 
 	// setters
 }; 

@@ -25,7 +25,7 @@ void Session::handleDisconnect(const boost::system::error_code& error) {
     else if (error == boost::asio::error::connection_reset) {
         _Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Client connection reset", 2);
     }
-    else {
+    else if (error != boost::asio::error::operation_aborted) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Client connection error: " + error.message(), 2);
     }
 

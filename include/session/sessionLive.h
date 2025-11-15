@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "config.h"
 #include "session/sessionManager.h"
+#include <connect_processing/disconnectTypeEnum.h>
 
 #include <memory>
 #include <chrono>

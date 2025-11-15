@@ -112,9 +112,9 @@ void Logger::addServerLog(logType log_type, std::string log_str, unsigned short 
 	}
 }
 
-void Logger::addSessionLog(logType log_type, std::string& UID, std::string log_str, unsigned short int logging_flag) {
+void Logger::addSessionLog(logType log_type, uint64_t& UID, std::string log_str, unsigned short int logging_flag) {
 	try {
-		log(log_type, log_str, logging_flag, _Config->configuration_vars_["log_dir"] + "/" + _Config->configuration_vars_["log_session_subdir"] + "/" + UID + ".txt");
+		log(log_type, log_str, logging_flag, _Config->configuration_vars_["log_dir"] + "/" + _Config->configuration_vars_["log_session_subdir"] + "/" + std::to_string(UID)+ ".txt");
 	}
 	catch (const std::exception& error) {
 		//addServerLog(Logger::warn, module_name + " except: " + std::string(error.what()), 2);

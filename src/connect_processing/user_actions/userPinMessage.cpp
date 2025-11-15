@@ -3,3 +3,7 @@
 UserPinMessage::UserPinMessage() {
 
 }
+
+void UserPinMessage::processing(ClientContext& context) {
+
+}

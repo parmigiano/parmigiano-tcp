@@ -30,7 +30,7 @@ void SessionLive::checkActivity() {
                     UID, 
                     "the last session activity was more than" + _Config->configuration_vars_["sessionLiveTime"] + " minutes ago", 
                     0, 
-                    _ClientShutdown->inactive
+                    inactive
                 );
             }
         }

@@ -3,6 +3,7 @@
 #include "logger.h"
 #include "config.h"
 #include "session/sessionManager.h"
+#include "connect_processing/disconnectTypeEnum.h"
 
 #include <memory>
 #include <string>
@@ -11,15 +12,6 @@
 class SendResponse;
 
 class ClientShutdown {
-public:
-	enum disconnectType {
-		warn, 
-		error, 
-		tempBan, 
-		inactive,
-		littleInfo
-	};
-
 private:
 	Config* _Config;
 	Logger* _Logger;

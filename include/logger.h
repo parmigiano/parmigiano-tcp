@@ -43,5 +43,5 @@ public:
 	inline bool isInitalized() const;
 
 	void addServerLog(logType, std::string log_str, unsigned short int logging_flag);
-	void addSessionLog(logType, std::string& UID, std::string log_str, unsigned short int logging_flag);
+	void addSessionLog(logType, uint64_t& UID, std::string log_str, unsigned short int logging_flag);
 };

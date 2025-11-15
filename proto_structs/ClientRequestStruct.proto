@@ -63,6 +63,7 @@ message ClientEditMessagePacket {
     uint64 chat_id = 2; // в каком чате
 	uint64 message_id = 3; // id измененного сообщения
 	string content = 4; // Новое сообщение
+	string content_type = 5; // Тип сообщения 'text', 'image', ...
 }
 
 // client pin message
@@ -77,6 +78,11 @@ message ClientDeleteMessagePacket {
 	uint64 uid = 1; // кто удалил uid
     uint64 chat_id = 2; // в каком чате
 	uint64 message_id = 3; // id удаленного сообщения
+}
+
+message ClientMessageIsDeliveredPacket {
+    uint64 chat_id = 1; 
+	uint64 message_id = 2; 
 }
 
 message ClientInfo{
@@ -97,6 +103,7 @@ message RequestInfo {
 		user_online_status = 9;
 		get_unread_message_count = 10;
 		welcome_package = 11;
+		rsa_key = 12;
 	}
 
 	requestTypes type = 1;
@@ -123,4 +130,5 @@ message Request {
 	ClientReadMessagePacket clientReadMessagePacket = 11;
 	ClientEditMessagePacket clientEditMessagePacket = 12;
 	ClientDeleteMessagePacket clientDeleteMessagePacket = 13;
+	ClientPinMessagePacket clientPinMessagePacket = 14;
 }

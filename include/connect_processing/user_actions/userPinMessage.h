@@ -9,4 +9,6 @@ private:
 public:
 	UserPinMessage();
 	~UserPinMessage() = default;
+
+	void processing(ClientContext& context) override;
 };

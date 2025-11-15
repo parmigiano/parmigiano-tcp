@@ -17,31 +17,9 @@ UserStatusService::UserStatusService() {
 	_UserActives = std::make_shared<UserActivesTable>();
 }
 
-uint64_t UserStatusService::getUID(boost::asio::ip::tcp::socket& client_socket) {
-	std::vector <uint64_t> list_of_uid = _SessionManager->getListOfUID();
-	uint64_t UID = 0;
-
-	if (list_of_uid.empty()) {
-		throw std::runtime_error("Server havent any session");
-	}
-
-	for (uint64_t& user_id : list_of_uid) {
-		boost::asio::ip::tcp::socket& sock = _SessionManager->getSessionSocket(user_id);
-		if (&sock == &client_socket) {
-			UID = user_id;
-		}
-	}
-
-	if (UID == 0) {
-		throw std::runtime_error("Dont find user: " + std::to_string(UID) + " in sessions");
-	}
-
-	return UID;
-}
-
 void UserStatusService::notifyOffline(boost::asio::ip::tcp::socket& client_socket) {
 	try {
-		uint64_t UID = getUID(client_socket);
+		uint64_t UID = _SessionManager->getUIDbySocket(client_socket);
 
 		notifyOffline(UID);
 	}
@@ -55,17 +33,17 @@ void UserStatusService::notifyOffline(boost::asio::ip::tcp::socket& client_socke
 
 void UserStatusService::notifyOffline(uint64_t& UID) {
 	try {
-		std::vector <uint64_t> interlocutors = _ChatMembers->getListOfInterlocutors(UID);
+		std::vector <uint64_t> interlocutors = _ChatMembers->getListOfAllInterlocutors(UID);
 
 		if (interlocutors.empty()) {
 			_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " User: " + std::to_string(UID)+ " havent interlocutors", 2);
 		}
 
-		for (uint64_t& user_id : interlocutors) {
-			boost::asio::ip::tcp::socket& sock = _SessionManager->getSessionSocket(user_id);
+		for (uint64_t& interlocutor_uid : interlocutors) {
+			boost::asio::ip::tcp::socket& sock = _SessionManager->getSessionSocket(interlocutor_uid);
 			// notify that one of the participants is offline
-			_SendResponse->setClientActiveOnlineStatus(false);
-			_SendResponse->setClientActiveUID(user_id);
+			_SendResponse->setClientActiveInfo(interlocutor_uid, false);
+			_SendResponse->setResponseType(user_online_status);
 
 			_SendResponse->sendResponse(sock);
 		}
@@ -83,7 +61,7 @@ void UserStatusService::notifyOffline(uint64_t& UID) {
 
 void UserStatusService::notifyOnline(boost::asio::ip::tcp::socket& client_socket) {
 	try {
-		uint64_t UID = getUID(client_socket);
+		uint64_t UID = _SessionManager->getUIDbySocket(client_socket);
 
 		notifyOffline(UID);
 	}
@@ -97,18 +75,18 @@ void UserStatusService::notifyOnline(boost::asio::ip::tcp::socket& client_socket
 
 void UserStatusService::notifyOnline(uint64_t& UID) {
 	try {
-		std::vector <uint64_t> interlocutors = _ChatMembers->getListOfInterlocutors(UID);
+		std::vector <uint64_t> interlocutors = _ChatMembers->getListOfAllInterlocutors(UID);
 
-		for (uint64_t& user_id : interlocutors) {
-			boost::asio::ip::tcp::socket& sock = _SessionManager->getSessionSocket(user_id);
+		for (uint64_t& interlocutor_uid : interlocutors) {
+			boost::asio::ip::tcp::socket& sock = _SessionManager->getSessionSocket(interlocutor_uid);
 			// notify that one of the participants is online
-			_SendResponse->setClientActiveOnlineStatus(true);
-			_SendResponse->setClientActiveUID(user_id);
+			_SendResponse->setResponseType(user_online_status);
+			_SendResponse->setClientActiveInfo(interlocutor_uid, true);
 
 			_SendResponse->sendResponse(sock);
 		}
 
-		_SessionManager->updateLastActivity(UID);
+		//_SessionManager->updateLastActivity(UID);
 		_UserActives->setOnlineStatusByUID(UID, _UserActives->online);
 	}
 	catch (const std::exception& error) {

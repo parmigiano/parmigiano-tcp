@@ -9,4 +9,6 @@ private:
 public:
 	UserDeleteMessage();
 	~UserDeleteMessage() = default;
+
+	void processing(ClientContext& context) override;
 };

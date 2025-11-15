@@ -9,4 +9,6 @@ private:
 public:
 	UserTyping();
 	~UserTyping() = default;
+
+	void processing(ClientContext& context) override;
 };

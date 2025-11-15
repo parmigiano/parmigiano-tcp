@@ -15,6 +15,12 @@ include(FetchContent)
 
 find_package(PostgreSQL REQUIRED)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+set(ABSL_PROPAGATE_CXX_STD ON)
+set(ABSL_ENABLE_INSTALL ON)
+set(ABSL_USE_MSVC_RUNTIME_LIBRARY_DLL OFF)
+
 # get and build protocol buffers
 FetchContent_Declare(
   protobuf
@@ -23,7 +29,6 @@ FetchContent_Declare(
 )
 
 set(protobuf_BUILD_TESTS OFF) # disable tests
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug")
 
 # get and build boost.asio
 FetchContent_Declare(

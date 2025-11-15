@@ -3,3 +3,7 @@
 UserTyping::UserTyping() {
 
 }
+
+void UserTyping::processing(ClientContext& context) {
+
+}

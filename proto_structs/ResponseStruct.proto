@@ -23,60 +23,68 @@ message ClientActivePacket {
 }
 
 // packet for claim client public key
-message ClientConnectedPacket {
-	uint64 uid = 1; // user id
-    bytes public_key = 2; // public key
-}
+//message ClientConnectedPacket {
+	//uint64 uid = 1; // user id
+    //bytes public_key = 2; // public key
+//}
 
 // send to cleint synchronous encryption key of a specific chat
-message RsaKeyPacket {
-	uint64 chat_id = 1; // which chat opened - (+find other user/s by chat_id)
-    string algorithm = 2; // a hui ego poymi nahuya ?? "RSA-2048" | "X25519" | ...
-}
+//message RsaKeyPacket {
+	//uint64 chat_id = 1; // which chat opened - (+find other user/s by chat_id)
+    //string algorithm = 2; // a hui ego poymi nahuya ?? "RSA-2048" | "X25519" | ...
+//}
 
 // client is typing
-message ClientTypingPacket {
+message ClientTyping {
 	uint64 uid = 1; // user id
     uint64 chat_id = 2; // chatikus
 	bool is_typing = 3; // stop/start typing
 }
 
 // client is send messga to chat/group
-message ClientSendMessagePacket {
-	uint64 uid = 1; // user id
+message ClientSendMessage {
+	uint64 message_id = 1; // message id
     uint64 chat_id = 2; // chaaaaaaatik
-	string content = 3; // text of the message
-	string content_type = 4; // type of the message 'text', 'media', ...
+    uint64 sender_uid = 3; // id of message sender
+	string content = 4; // text of the message
+	string content_type = 5; // type of the message 'text', 'media', ...
+	string delivered_at = 6; // time of delivered message
 }
 
 // client read message
-message ClientReadMessagePacket {
+message ClientReadMessage {
     uint64 chat_id = 1; // chaaaaat
 	uint64 message_id = 2; // id of readed message
 }
 
 // cleint edit message
-message ClientEditMessagePacket {
-    uint64 chat_id = 1; // в каком чате
-	uint64 message_id = 2; // id of edited message
-	string content = 3; // text that will be displayed after change
+message ClientEditMessage {
+    uint64 message_id = 1; // message id
+    uint64 chat_id = 2; // chaaaaaaatik
+    uint64 sender_uid = 3; // id of message sender
+	string content = 4; // text of the message
+	string content_type = 5; // type of the message 'text', 'media', ...
+	string delivered_at = 6; // time of delivered message
 }
 
 // client pin message
-message ClientPinMessagePacket {
-	uint64 uid = 1; // user id
-    uint64 chat_id = 2; // chaaat
-	uint64 message_id = 3; // id of pinned message
+message ClientPinMessage {
+	uint64 message_id = 1; // message id
+    uint64 chat_id = 2; // chaaaaaaatik
+    uint64 sender_uid = 3; // id of message sender
+	string content = 4; // text of the message
+	string content_type = 5; // type of the message 'text', 'media', ...
+	string delivered_at = 6; // time of delivered message
 }
 
 // client delete message
-message ClientDeleteMessagePacket {
+message ClientDeleteMessage {
     uint64 chat_id = 1; // chaaat
 	uint64 message_id = 2; // id of deleted message
 }
 
 // out number of unread messages in the chat
-message ClientUnreadMessagesCountPacket {
+message ClientUnreadMessagesCount {
     uint64 chat_id = 1; // chaaaat
 	int32 count = 2; // number of unread messages
 }
@@ -129,13 +137,13 @@ message Response {
 	NameOfMainExeFile nameOfMainExeFile = 5;
 
 	// hz(hui znaet) fields
-	ClientActivePacket clientActivePacket = 6;
-	ClientConnectedPacket clientConnectedPacket = 7;
-	RsaKeyPacket RsaKeyPacket = 8;
-	ClientTypingPacket clientTypingPacket = 9;
-	ClientSendMessagePacket clientSendMessagePacket = 10;
-	ClientReadMessagePacket clientReadMessagePacket = 11;
-	ClientEditMessagePacket clientEditMessagePacket = 12;
-	ClientDeleteMessagePacket clientDeleteMessagePacket = 13;
-
+	ClientActivePacket clientActive = 6;
+	//ClientConnectedPacket clientConnected = 7;
+	//RsaKeyPacket RsaKeyPacket = 8;
+	ClientTyping clientTyping = 7;
+	ClientSendMessage clientSendMessage = 8;
+	ClientReadMessage clientReadMessage = 9;
+	ClientEditMessage clientEditMessage = 10;
+	ClientDeleteMessage clientDeleteMessage = 11;
+	ClientPinMessage clientPinMessage = 12;
 }

@@ -7,15 +7,19 @@ UserActivesTable::UserActivesTable() {
 }
 
 void UserActivesTable::initStatements() {
-    _PreparedStatementManager->registerStatement("getOnlineStatusByUID", "SELECT online FROM user_actives WHERE user_uid = $1");
+    _PreparedStatementManager->registerStatement("getOnlineStatusByUID", R"(SELECT online 
+																			FROM user_actives 
+																			WHERE user_uid = $1)");
 
-    _PreparedStatementManager->registerStatement("setOnlineStatusByUID", "UPDATE user_actives SET online = $1 WHERE user_uid = $2");
+    _PreparedStatementManager->registerStatement("setOnlineStatusByUID", R"(UPDATE user_actives 
+																			SET online = $1 
+																			WHERE user_uid = $2)");
 }
 
 std::string UserActivesTable::getOnlineStatusByUID(uint64_t& UID) {
 	try {
-		std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
-		pqxx::work transaction(*conn);
+		//std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+		pqxx::work transaction(*_Connection);
 
 		pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getOnlineStatusByUID", UID);
 
@@ -36,8 +40,8 @@ std::string UserActivesTable::getOnlineStatusByUID(uint64_t& UID) {
 void UserActivesTable::setOnlineStatusByUID(uint64_t& UID, onlineStatus status_type) {
 	try {
 		bool status;
-		std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
-		pqxx::work transaction(*conn);
+		//std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+		pqxx::work transaction(*_Connection);
 
 		switch (status_type) {
 		case UserActivesTable::online:

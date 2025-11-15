@@ -49,6 +49,7 @@ public:
 	std::chrono::time_point<std::chrono::system_clock> getSessionLastActivity(uint64_t& UID);
 	boost::asio::ip::tcp::socket& getSessionSocket(uint64_t& UID);
 	std::vector<uint64_t> getListOfUID();
+	uint64_t getUIDbySocket(boost::asio::ip::tcp::socket& client_socket);
 
 	void removeClientFromTable(uint64_t& UID);
 };

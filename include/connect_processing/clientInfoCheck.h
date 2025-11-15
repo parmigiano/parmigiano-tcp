@@ -2,6 +2,7 @@
 
 //#include "sessionManager.h"
 #include "logger.h"
+#include "connect_processing/disconnectTypeEnum.h"
 #include "ClientRequestStruct.pb.h"
 
 #include <string>

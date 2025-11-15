@@ -13,8 +13,11 @@ ClientShutdown::ClientShutdown() {
 }
 
 void ClientShutdown::disconnectCommon(boost::asio::ip::tcp::socket& client_socket) {
-    client_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both);
-    client_socket.close();
+    boost::system::error_code ec;
+
+    client_socket.cancel(ec);
+    client_socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
+    client_socket.close(ec);
 }
 
 void ClientShutdown::disconnect(uint64_t& UID) {
@@ -28,10 +31,10 @@ void ClientShutdown::disconnect(boost::asio::ip::tcp::socket& client_socket) {
 }
 
 void ClientShutdown::notifyCommon(boost::asio::ip::tcp::socket& client_socket, std::string& description, short int& code, disconnectType& disconnect_type) {
-    _SendResponse->setDisconnectDescription(description);
-    _SendResponse->setDisconnectCode(code);
+    _SendResponse->setDisonnectType(disconnect_type);
+    _SendResponse->setDisconnectInfo(description, code);
 
-    switch (disconnect_type) {
+    /*switch (disconnect_type) {
     case ClientShutdown::error:
         _SendResponse->setDisonnectType(_SendResponse->error);
         break;
@@ -50,7 +53,7 @@ void ClientShutdown::notifyCommon(boost::asio::ip::tcp::socket& client_socket, s
     default:
         throw std::runtime_error("Unknw disconnect type");
         break;
-    }
+    }*/
 
     _SendResponse->sendResponse(client_socket);
 }

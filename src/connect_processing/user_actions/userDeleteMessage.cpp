@@ -3,3 +3,7 @@
 UserDeleteMessage::UserDeleteMessage() {
 
 }
+
+void UserDeleteMessage::processing(ClientContext& ctx) {
+
+}

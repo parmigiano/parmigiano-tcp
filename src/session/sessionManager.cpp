@@ -82,6 +82,27 @@ std::vector<uint64_t> SessionManager::getListOfUID() {
 	return list_of_uid_;
 }
 
+uint64_t SessionManager::getUIDbySocket(boost::asio::ip::tcp::socket& client_socket) {
+	uint64_t UID = 0;
+
+	if (list_of_uid_.empty()) {
+		throw std::runtime_error("Server havent any session");
+	}
+
+	for (uint64_t& user_id : list_of_uid_) {
+		boost::asio::ip::tcp::socket& sock = getSessionSocket(user_id);
+		if (&sock == &client_socket) {
+			UID = user_id;
+		}
+	}
+
+	if (UID == 0) {
+		throw std::runtime_error("Dont find user: " + std::to_string(UID) + " in sessions");
+	}
+
+	return UID;
+}
+
 void SessionManager::removeClientFromTable(uint64_t& UID) {
 	std::lock_guard<std::mutex> lock(mtx_);
 	if (sessionExist(UID)) {

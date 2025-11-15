@@ -12,9 +12,9 @@ ClientInfoCheck::ClientInfoCheck() {
 bool ClientInfoCheck::checkUID(uint64_t& UID, boost::asio::ip::tcp::socket& client_socket) {
     try {
         if (UID <= 0) {
-            _ClientShutdown->disconnectClientByReason(client_socket, "", 0, _ClientShutdown->littleInfo); // namutit peregruzku shobi i po UID i po socket
+            _ClientShutdown->disconnectClientByReason(client_socket, "", 0,littleInfo); // namutit peregruzku shobi i po UID i po socket
 
-            _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Client havent UID and dont added to sessions table", 2);
+            //_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Client havent UID and dont added to sessions table", 2);
             //throw std::runtime_error("Client havent UID and dont added to sessions table");
             return false;
         }
