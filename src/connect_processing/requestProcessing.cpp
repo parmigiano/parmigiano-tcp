@@ -32,8 +32,9 @@ RequestProcessing::RequestProcessing() {
 }
 
 void RequestProcessing::requestDistribution(std::string request_str, boost::asio::ip::tcp::socket& client_socket) {
-    try { 
-        ClientRequestStruct::Request accepted_request;
+    try {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " hi", 2);
+        /*ClientRequestStruct::Request accepted_request;
         accepted_request.ParseFromString(request_str);
 
         if (!_ClientInfoCheck->checkInfoFullness(accepted_request, client_socket)) {
@@ -53,7 +54,7 @@ void RequestProcessing::requestDistribution(std::string request_str, boost::asio
         }
         else {
             _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " unkwn requst type", 2);
-        }
+        }*/
     } 
     catch (const std::exception& error) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);

@@ -73,7 +73,7 @@ void MessagesTable::updateIsEdited(uint64_t& chat_id, uint64_t& message_id) {
         //std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
         pqxx::work transaction(*_Connection);
 
-        pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "addMessage", message_id, chat_id);
+        pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "updateIsEdited", message_id, chat_id);
 
         transaction.commit();
     }

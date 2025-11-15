@@ -22,7 +22,7 @@ void UserReadMessage::processing(ClientContext& context) {
 
         std::vector<uint64_t> chat_members = _ChatMembersTable->getListOfChatMembers(UID, chat_id);
 
-        updateReadAt(message_id, chat_members);
+        updateTable(message_id, chat_members);
         notifyChatMembers(chat_id, message_id, chat_members);
     }
     catch (const std::exception& error) {
@@ -44,7 +44,7 @@ void UserReadMessage::notifyChatMembers(uint64_t& chat_id, uint64_t& message_id,
     }
 }
 
-void UserReadMessage::updateReadAt(uint64_t& message_id, std::vector<uint64_t> chat_members) {
+void UserReadMessage::updateTable(uint64_t& message_id, std::vector<uint64_t> chat_members) {
     for (uint64_t& member_uid : chat_members) {
         _MessageStatuses->updateReadAt(message_id, member_uid);
     }

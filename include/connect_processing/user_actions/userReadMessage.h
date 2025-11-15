@@ -19,7 +19,7 @@ private:
 	std::shared_ptr<MessageStatusesTable> _MessageStatuses;
 
 	void notifyChatMembers(uint64_t& chat_id, uint64_t& message_id, std::vector<uint64_t> chat_members);
-	void updateReadAt(uint64_t& message_id, std::vector<uint64_t> chat_members);
+	void updateTable(uint64_t& message_id, std::vector<uint64_t> chat_members);
 
 	const std::string MODULE_NAME_ = "(UserReadMessage)";
 public:
