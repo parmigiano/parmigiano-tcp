@@ -1,22 +1,23 @@
 #include "main.h"
 
-#include "tcpServer.h"
+#include "session/tcpServer.h"
 #include "scheduler.h"
-#include "usersQueue.h"
+#include "session/usersQueue.h"
+#include "database/database.h"
 
 //#include <iostream> // fu ubrat'
 //#include <map>
 #include <thread>
 
 int main() {
-	setlocale(LC_ALL, "ru");
-
+	//setlocale(LC_ALL, "RU");
+	SetConsoleOutputCP(CP_UTF8);
 	std::shared_ptr<AppControl> _appControl;
 	_appControl = std::make_shared<AppControl>();
 
 	_appControl->startApp();
 
-	//system("pause");
+	system("pause");
 
 	return 0;
 }
@@ -28,7 +29,14 @@ AppControl::AppControl(){
 	_Logger = Logger::get_instance();
 	_Logger->initialize();
 
-	_Database = Database::get_instance();
+	_Database = std::make_shared<Database>();
+	_Database->initialize(
+		" password=" + _Config->configuration_vars_["DB_PASSWORD"] +
+		" dbname=" + _Config->configuration_vars_["DB_NAME"] +
+		" port=" + _Config->configuration_vars_["DB_PORT"] +
+		" host=" + _Config->configuration_vars_["DB_ADDRESS"] +
+		" user=" + _Config->configuration_vars_["DB_USER"]
+	);
 
 	_UsersQueue = std::make_shared<UsersQueue>();
 	_Scheduler = std::make_shared<Scheduler>();
@@ -40,16 +48,9 @@ AppControl::AppControl(){
 //}
 
 int AppControl::startApp() {
-	std::thread(&UsersQueue::queueHandler, _UsersQueue.get()).detach();
-
 	_Scheduler->start();
 
-	_Database->initialize(
-		" password=" + _Config->configuration_vars_["DB_PASSWORD"] +
-		" dbname=" + _Config->configuration_vars_["DB_USER"] +
-		" port=" + _Config->configuration_vars_["DB_PORT"] +
-		" host=" + _Config->configuration_vars_["DB_ADDRESS"]
-	);
+	std::thread(&UsersQueue::queueHandler, _UsersQueue.get()).detach();
 
 	io_context.run();
 

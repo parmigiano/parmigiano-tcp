@@ -1,5 +1,4 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
 
 //#include "logger.h"
 
@@ -23,7 +22,7 @@ private:
     static Config* instance_ptr_;
     static std::mutex mtx_;
 
-    std::vector<std::string> env_parse_names_ = { "DB_USER", "DB_PASSWORD", "DB_URL" };
+    // std::vector<std::string> env_parse_names_ = { "DB_USER", "DB_PASSWORD", "DB_URL" };
     std::map<std::string, std::string> temp_vars_develop_;
     std::map<std::string, std::string> temp_vars_production_;
 
@@ -57,7 +56,7 @@ public:
         {"DB_PASSWORD", "null"},
         {"DB_ADDRESS", "null"},
         {"DB_PORT", "null"},
-        {"DB_NAME", ""}
+        {"DB_NAME", "null"}
     };
 
     // For send responses
@@ -72,5 +71,3 @@ public:
     void initialize();
     bool isInitialize();
 };
-
-#endif 

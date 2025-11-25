@@ -1050,3 +1050,6 @@ srcOLD/
 includeOLD/
 latestClientBuild/
 json-develop/
+
+# generated .proto files
+./include/generated_proto

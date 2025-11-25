@@ -5,7 +5,7 @@ set(EXECUTABLE_NAME ServerMain)
 
 project(${PROJECT_NAME}) # default LANGUAGE C CXX
 
-set(GENERATED_PROTO_DIR "${CMAKE_BINARY_DIR}/generatedProto")
+set(GENERATED_PROTO_DIR "${CMAKE_BINARY_DIR}/generated_proto")
 file(MAKE_DIRECTORY ${GENERATED_PROTO_DIR})
 
 include(FetchContent)
@@ -15,6 +15,12 @@ include(FetchContent)
 
 find_package(PostgreSQL REQUIRED)
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+set(ABSL_PROPAGATE_CXX_STD ON)
+set(ABSL_ENABLE_INSTALL ON)
+set(ABSL_USE_MSVC_RUNTIME_LIBRARY_DLL OFF)
+
 # get and build protocol buffers
 FetchContent_Declare(
   protobuf
@@ -23,7 +29,6 @@ FetchContent_Declare(
 )
 
 set(protobuf_BUILD_TESTS OFF) # disable tests
-set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDebug")
 
 # get and build boost.asio
 FetchContent_Declare(
@@ -47,25 +52,36 @@ FetchContent_MakeAvailable(protobuf boost libpqxx)
 
 include(${protobuf_SOURCE_DIR}/cmake/protobuf-generate.cmake)
 
-file(GLOB SOURCES_CPP
-	./include/*.h
-	./src/*.cpp
+file(GLOB SOURCES_FILES
+	${CMAKE_CURRENT_SOURCE_DIR}/include/connect_processing/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/connect_processing/user_actions/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/database/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/database/tables/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/session/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+
+	${CMAKE_CURRENT_SOURCE_DIR}/src/connect_processing/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/connect_processing/user_actions/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/database/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/database/tables/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/session/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
 )
 
-add_executable(${EXECUTABLE_NAME} ${SOURCES_CPP})
+add_executable(${EXECUTABLE_NAME} ${SOURCES_FILES})
 
 protobuf_generate(
     TARGET ${EXECUTABLE_NAME}
     LANGUAGE cpp
 	PROTOS
-		${CMAKE_CURRENT_SOURCE_DIR}/protoStructs/ClientRequestStruct.proto
-		${CMAKE_CURRENT_SOURCE_DIR}/protoStructs/ResponseStruct.proto
+		${CMAKE_CURRENT_SOURCE_DIR}/proto_structs/ClientRequestStruct.proto
+		${CMAKE_CURRENT_SOURCE_DIR}/proto_structs/ResponseStruct.proto
     PROTOC_OUT_DIR ${GENERATED_PROTO_DIR}
-    IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/protoStructs
+    IMPORT_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/proto_structs
 )
 
 target_include_directories(${EXECUTABLE_NAME} PRIVATE # replace #include "../include/ConnectionManager.h" to #include "ConnectionManager.h"
-	${CMAKE_CURRENT_SOURCE_DIR}/include
+	${CMAKE_CURRENT_SOURCE_DIR}/include/
 	${GENERATED_PROTO_DIR}
     #${PostgreSQL_INCLUDE_DIR}
 )

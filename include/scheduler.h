@@ -1,5 +1,4 @@
-#ifndef SCHEDULER_H
-#define SCHEDULER_H
+#pragma once
 
 #include "logger.h"
 #include "config.h"
@@ -42,5 +41,3 @@ public:
 	void stop();
 	void addTask(std::shared_ptr<Task> task);
 };
-
-#endif 

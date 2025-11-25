@@ -1,5 +1,5 @@
 # develop/production
-mode=develop
+mode=production
 
 # general settings
 server_port=5462
@@ -11,4 +11,4 @@ log_session_subdir=sessions
 log_dir_develop=./log
 
 # production vars
-log_dir_production=/root/parmigiano-tcp/log
+log_dir_production=./log

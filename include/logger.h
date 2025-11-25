@@ -1,5 +1,4 @@
-#ifndef LOGGER_H
-#define LOGGER_H
+#pragma once
 
 #include <config.h>
 
@@ -19,7 +18,7 @@ private:
 
 	static Logger* instance_ptr_;
 	static std::mutex mtx_;
-	std::ofstream file_;
+	//std::ofstream file_;
 
 	std::string definitionLogType(logType);
 	std::string getActualTime();
@@ -44,7 +43,5 @@ public:
 	inline bool isInitalized() const;
 
 	void addServerLog(logType, std::string log_str, unsigned short int logging_flag);
-	void addSessionLog(logType, std::string& UID, std::string log_str, unsigned short int logging_flag);
+	void addSessionLog(logType, uint64_t& UID, std::string log_str, unsigned short int logging_flag);
 };
-
-#endif 

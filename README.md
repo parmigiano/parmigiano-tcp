@@ -49,13 +49,13 @@ mkdir nmake && cd nmake
 Generating build files for nmake
 
 ```cmd
-cmake -G "NMake Makefiles" ../..
+cmake -G "NMake Makefiles" ../.. -DCMAKE_BUILD_TYPE=Release
 ```
 
 If error occurs when generating files. which reports that PostgreSQL could not be found, you must specify full path to it as shown below
 
 ```cmd
-cmake -G "NMake Makefiles" ../.. -DPostgreSQL_ROOT="path_to_PostgreSql/version"
+cmake -G "NMake Makefiles" ../.. -DPostgreSQL_ROOT="path_to_PostgreSql/version" -DCMAKE_BUILD_TYPE=Release
 ```
 
 ## Build project
