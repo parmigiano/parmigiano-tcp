@@ -1,8 +1,6 @@
 #pragma once
 
 enum responseType {
-	file_hash_request,
-	download_file,
 	send_message,
 	read_message,
 	edit_message,

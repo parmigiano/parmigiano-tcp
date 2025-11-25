@@ -9,8 +9,12 @@
 #include <memory>
 #include <pqxx/pqxx>
 
+class Database;
+
 class MessageStatusesTable : BaseTable {
 private:
+	std::shared_ptr<Database> _Database;
+
 	const std::string MODULE_NAME_ = "(Table MessageStatuses)"; 
 public:
 	MessageStatusesTable();

@@ -1,9 +1,14 @@
 #include "database/tables/userActivesTable.h"
 
+#include "database/database.h"
+
 UserActivesTable::UserActivesTable() {
+	_Database = std::make_shared<Database>();
+
 	/*_Database = Database::get_instance();
 	_Logger = Logger::get_instance();
 	_PreparedStatementManager = PreparedStatementManager::get_instance();*/
+	initStatements();
 }
 
 void UserActivesTable::initStatements() {
@@ -18,7 +23,7 @@ void UserActivesTable::initStatements() {
 
 std::string UserActivesTable::getOnlineStatusByUID(uint64_t& UID) {
 	try {
-		//std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+		std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
 		pqxx::work transaction(*_Connection);
 
 		pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getOnlineStatusByUID", UID);
@@ -29,18 +34,18 @@ std::string UserActivesTable::getOnlineStatusByUID(uint64_t& UID) {
 	}
 	catch (const std::exception& error) {
 		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-		return "";
+		return std::string();
 	}
 	catch (...) {
 		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-		return "";
+		return std::string();
 	}
 }
 
 void UserActivesTable::setOnlineStatusByUID(uint64_t& UID, onlineStatus status_type) {
 	try {
 		bool status;
-		//std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+		std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
 		pqxx::work transaction(*_Connection);
 
 		switch (status_type) {

@@ -12,6 +12,8 @@
 #include <functional>
 #include <unordered_map>
 
+class Session;
+
 class SendResponse;
 class UserStatusService;
 class ClientInfoCheck;
@@ -51,8 +53,7 @@ public:
 	RequestProcessing();
 	~RequestProcessing() = default;
 
-	void requestDistribution(std::string request_str, boost::asio::ip::tcp::socket& client_socket);
+	void requestDistribution(std::string request_str, Session& session);
 
-	void handleUserOnlineStatus(ClientContext& context);
-	void handleWelcomePacket(ClientContext& context);
+	void handleUserActivePacket(ClientContext& context);
 };

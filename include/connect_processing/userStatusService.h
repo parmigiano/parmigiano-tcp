@@ -27,9 +27,9 @@ public:
 	UserStatusService();
 	~UserStatusService() = default;
 
-	void notifyOffline(boost::asio::ip::tcp::socket& client_sock);
-	void notifyOffline(uint64_t& UID);
+	//void notifyOffline(Session& session);
+	void notifyOffline(Session& session);
 
-	void notifyOnline(boost::asio::ip::tcp::socket& client_sock);
-	void notifyOnline(uint64_t& UID);
+	//void notifyOnline(Session& session);
+	void notifyOnline(Session& session);
 };

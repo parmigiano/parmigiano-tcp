@@ -9,6 +9,8 @@
 #include <memory>
 #include <pqxx/pqxx>
 
+class Database;
+
 class UserActivesTable : BaseTable {
 public:
 	enum onlineStatus {
@@ -16,9 +18,12 @@ public:
 		offline
 	};
 private:
+	std::shared_ptr<Database> _Database;
+
 	/*Database* _Database;
 	Logger* _Logger;
 	PreparedStatementManager* _PreparedStatementManager;*/
+
 
 	const std::string MODULE_NAME_ = "(Table UserActives)";
 	// pqxx::work txn;

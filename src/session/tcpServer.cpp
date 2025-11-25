@@ -18,8 +18,7 @@ TcpServer::TcpServer(boost::asio::io_context& io_context, int port) : io_context
 void TcpServer::start_accept(){
     auto new_session = std::make_shared<Session>(io_context_);
 
-    acceptor_.async_accept(new_session->socket(),
-        [this, new_session](const boost::system::error_code& error) {
+    acceptor_.async_accept(new_session->socket(), [this, new_session](const boost::system::error_code& error) {
             handle_accept(new_session, error);
     });
 
@@ -28,8 +27,8 @@ void TcpServer::start_accept(){
 
 void TcpServer::handle_accept(std::shared_ptr<Session> session, const boost::system::error_code& error){
     if (!error) {
-        _Logger->addServerLog(_Logger->info, "", 2);
-        _Logger->addServerLog(_Logger->info, "----------NEW----------", 2);
+        //_Logger->addServerLog(_Logger->info, "", 2);
+        //_Logger->addServerLog(_Logger->info, "----------NEW----------", 2);
         _Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Client connected. From ip: " + session->socket().remote_endpoint().address().to_string(), 2);
 
         session->start();

@@ -10,9 +10,13 @@
 #include <vector>
 #include <pqxx/pqxx>
 
+class Database;
+
 class ChatMembersTable : BaseTable {
 public:
 private:
+	std::shared_ptr<Database> _Database;
+
 	/*Database* _Database;
 	Logger* _Logger;
 	PreparedStatementManager* _PreparedStatementManager;*/

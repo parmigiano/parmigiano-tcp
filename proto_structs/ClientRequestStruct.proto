@@ -80,11 +80,6 @@ message ClientDeleteMessagePacket {
 	uint64 message_id = 3; // id удаленного сообщения
 }
 
-message ClientMessageIsDeliveredPacket {
-    uint64 chat_id = 1; 
-	uint64 message_id = 2; 
-}
-
 message ClientInfo{
 	uint64 uid = 1;
 }
@@ -100,10 +95,9 @@ message RequestInfo {
 		pin_message = 6;
 		delete_message = 7;
 		user_typing = 8;
-		user_online_status = 9;
+		user_active_packet = 9;
 		get_unread_message_count = 10;
-		welcome_package = 11;
-		rsa_key = 12;
+		rsa_key = 11;
 	}
 
 	requestTypes type = 1;

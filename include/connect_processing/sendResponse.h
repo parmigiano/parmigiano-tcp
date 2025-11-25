@@ -13,9 +13,9 @@
 #include <memory>
 #include <boost/asio.hpp>
 
-//class Session;
+class Session;
 
-class SendResponse {
+class SendResponse : public std::enable_shared_from_this<SendResponse> {
 private:
 	Logger* _Logger;
 	Config* _Config;
@@ -38,29 +38,18 @@ public:
 	void setDisonnectType(disconnectType disconnect_type);
 
 	void setDisconnectInfo(std::string& description, short int& code);
-	/*void setDisconnectDescription(std::string& description);
-	void setDisconnectCode(short int& code);*/
 
 	void setClientActiveInfo(uint64_t& UID, bool status);
-	/*void setClientActiveUID(uint64_t& UID);
-	void setClientActiveOnlineStatus(bool status);*/
 
 	void setSendMessageInfo(uint64_t& message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at);
-	/*void setSendMessageID();
-	void setSendMessageChatID();
-	void setSendMessageSenderUID();
-	void setSendMessageContent();
-	void setSendMessageContentType();
-	void setSendMessageDeliveredAt();*/
-
 	void setReadMessageInfo(uint64_t& message_id, uint64_t& chat_id);
-
-	void setPinnedMessageInfo(uint64_t& message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at);
-
+	void setPinnedMessageInfo(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id);
 	void setEditedMessageInfo(uint64_t& message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at);
+	void setDeletedMessageInfo(uint64_t& message_id, uint64_t& chat_id);
+	void setTypingInfo(uint64_t& UID, uint64_t& chat_id, bool& is_typing);
 
 	std::ifstream openFile(std::string& filepath, unsigned int& file_size);
 
-	void sendResponse(boost::asio::ip::tcp::socket& client_socket);
+	void sendResponse(Session& session);
 	void sendFile(std::string& filepath, boost::asio::ip::tcp::socket& client_socket);
 };

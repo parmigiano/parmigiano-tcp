@@ -1,25 +1,25 @@
 #pragma once
 
-#ifdef _WIN32
-#define _WIN32_WINNT 0x0A00 // force warn for win system
-#endif
-
 #define ASIO_STANDALONE
 
 #include "logger.h"
 #include "config.h"
+#include "session/usersQueue.h"
+#include "session/sessionManager.h"
 
 #include <boost/asio.hpp>
 
-class UsersQueue;
+//class UsersQueue;
 class UserStatusService;
 
 class Session : public std::enable_shared_from_this<Session> {
 private:
 	Logger* _Logger;
 	Config* _Config;
+	UsersQueue* _UsersQueue;
+	SessionManager* _SessionManager;
 
-	std::shared_ptr<UsersQueue> _UsersQueue;
+	//std::shared_ptr<UsersQueue> _UsersQueue;
 	std::shared_ptr<UserStatusService> _UserStatusService;
 
 	void handleDisconnect(const boost::system::error_code& error);

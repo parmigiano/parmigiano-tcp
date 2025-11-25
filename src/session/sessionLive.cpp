@@ -16,15 +16,15 @@ SessionLive::SessionLive() {
 
 void SessionLive::checkActivity() {
     try {
-        std::vector list_of_uid_ = _SessionManager->getListOfUID();
-        auto sessionLiveTime = std::chrono::minutes(std::stoi(_Config->configuration_vars_["sessionLiveTime"]));
+        /*std::vector list_of_uid_ = _SessionManager->getListOfUID();
+        auto sessionLiveTime = std::chrono::minutes(std::stoi(_Config->configuration_vars_["sessionLiveTime"]));*/
 
-        for (auto& UID : list_of_uid_) {
+        /*for (auto& UID : list_of_uid_) {
             auto now = std::chrono::system_clock::now();
             auto sessionLastActivity = _SessionManager->getSessionLastActivity(UID);
 
             if (now - sessionLastActivity >= sessionLiveTime) {
-                _SessionManager->removeClientFromTable(UID);
+                _SessionManager->removeSession(UID);
 
                 _ClientShutdown->disconnectClientByReason(
                     UID, 
@@ -33,9 +33,9 @@ void SessionLive::checkActivity() {
                     inactive
                 );
             }
-        }
+        }*/
 
-        list_of_uid_.clear();
+        //list_of_uid_.clear();
     }
     catch (const std::exception& error) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);

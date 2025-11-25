@@ -1,6 +1,7 @@
 #include "connect_processing/clientInfoCheck.h"
 
 #include "connect_processing/clientShutdown.h"
+#include "session/session.h"
 
 ClientInfoCheck::ClientInfoCheck() {
     _Logger = Logger::get_instance();
@@ -9,14 +10,17 @@ ClientInfoCheck::ClientInfoCheck() {
     _ClientShutdown = std::make_shared<ClientShutdown>();
 }
 
-bool ClientInfoCheck::checkUID(uint64_t& UID, boost::asio::ip::tcp::socket& client_socket) {
+bool ClientInfoCheck::checkUID(uint64_t& UID, Session* session) {
     try {
         if (UID <= 0) {
-            _ClientShutdown->disconnectClientByReason(client_socket, "", 0,littleInfo); // namutit peregruzku shobi i po UID i po socket
+            _ClientShutdown->disconnectClientByReason(session, "", 0,littleInfo); // namutit peregruzku shobi i po UID i po socket
 
             //_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Client havent UID and dont added to sessions table", 2);
             //throw std::runtime_error("Client havent UID and dont added to sessions table");
             return false;
+        }
+        else {
+            return true;
         }
     }
     catch (const std::exception& error) {
@@ -29,12 +33,17 @@ bool ClientInfoCheck::checkUID(uint64_t& UID, boost::asio::ip::tcp::socket& clie
     }
 }
 
-bool ClientInfoCheck::checkInfoFullness(ClientRequestStruct::Request& accepted_request, boost::asio::ip::tcp::socket& client_socket) {
+bool ClientInfoCheck::checkInfoFullness(ClientRequestStruct::Request& accepted_request, Session* session) {
     try {
         uint64_t UID = accepted_request.mutable_clientinfo()->uid();
 
-        if (checkUID(UID, client_socket)) {
+        //_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + std::to_string(UID), 2);
+
+        if (checkUID(UID, session)) {
             return true;
+        }
+        else {
+            return false;
         }
     }
     catch (const std::exception& error) {

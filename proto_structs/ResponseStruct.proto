@@ -69,12 +69,9 @@ message ClientEditMessage {
 
 // client pin message
 message ClientPinMessage {
-	uint64 message_id = 1; // message id
-    uint64 chat_id = 2; // chaaaaaaatik
-    uint64 sender_uid = 3; // id of message sender
-	string content = 4; // text of the message
-	string content_type = 5; // type of the message 'text', 'media', ...
-	string delivered_at = 6; // time of delivered message
+	uint64 uid = 1; // мой uid
+    uint64 chat_id = 2; // в каком чате
+	uint64 message_id = 3; // id закрепленного сообщения
 }
 
 // client delete message

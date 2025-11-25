@@ -1,31 +1,42 @@
 #include "database/tables/chatMembersTable.h"
 
+#include "database/database.h"
+
 ChatMembersTable::ChatMembersTable() {
+	_Database = std::make_shared<Database>();
+
 	/*_Database = Database::get_instance();
 	_Logger = Logger::get_instance();
 	_PreparedStatementManager = PreparedStatementManager::get_instance();*/
+	initStatements();
 }
 
 void ChatMembersTable::initStatements() {
-    _PreparedStatementManager->registerStatement("getListOfAllInterlocutors", R"(SELECT DISTINCT cm2.user_id
+    _PreparedStatementManager->registerStatement("getListOfAllInterlocutors", R"(SELECT DISTINCT cm2.user_uid
 																				FROM chat_members cm1
 																				JOIN chat_members cm2 ON cm1.chat_id = cm2.chat_id
-																				WHERE cm1.user_id = $1 
-																				AND cm2.user_id <> $2)");
+																				WHERE cm1.user_uid = $1 
+																				AND cm2.user_uid <> $2)");
 
     _PreparedStatementManager->registerStatement("getListOfChatMembers", R"(SELECT user_uid
 																			FROM chat_members
 																			WHERE chat_id = $1
-																			AND user_uid <> $2;)");
+																				AND user_uid <> $2
+																				AND EXISTS (
+																					SELECT 1
+																					FROM chat_members
+																					WHERE chat_id = $1
+																						AND user_uid = $2
+																					);)");
 }
 
 std::vector<uint64_t> ChatMembersTable::getListOfAllInterlocutors(uint64_t& UID) {
 	try {
 		std::vector <uint64_t> list_of_uid;
-		//std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+		std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
 		pqxx::work transaction(*_Connection);
 
-		pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getListOfAllInterlocutors", UID);
+		pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getListOfAllInterlocutors", UID, UID);
 
 		for (const pqxx::row& row : txn_result) {
 			list_of_uid.push_back(row[0].as<uint64_t>());
@@ -48,10 +59,10 @@ std::vector<uint64_t> ChatMembersTable::getListOfAllInterlocutors(uint64_t& UID)
 std::vector<uint64_t> ChatMembersTable::getListOfChatMembers(uint64_t& UID, uint64_t& chat_id) {
 	try {
 		std::vector <uint64_t> list_of_uid;
-		//std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+		std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
 		pqxx::work transaction(*_Connection);
 
-		pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getListOfAllInterlocutors", chat_id, UID);
+		pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getListOfChatMembers", chat_id, UID);
 
 		for (const pqxx::row& row : txn_result) {
 			list_of_uid.push_back(row[0].as<uint64_t>());

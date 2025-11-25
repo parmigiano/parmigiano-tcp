@@ -9,15 +9,18 @@
 #include <pqxx/pqxx>
 #include <mutex>
 
+class Database;
+
 class PreparedStatementManager {
 private:
-	Database* _Database;
+	//Database* _Database;
 	Logger* _Logger;
 
 	static PreparedStatementManager* instance_ptr_;
 	static std::mutex instance_mtx_;
 
-	std::shared_ptr<pqxx::connection> conn_;
+	std::shared_ptr<pqxx::connection> _Connection;
+	std::shared_ptr<Database> _Database;
 	std::unordered_map<std::string, std::string> prepared_;
 
 	const std::string MODULE_NAME_ = "(PreparedStatementManager)";
@@ -34,11 +37,11 @@ public:
 	std::string getSQL(const std::string& name);
 
 	template <typename... Args>
-	pqxx::result exec(pqxx::transaction_base& tb, const std::string& name, Args&&... args);
+	pqxx::result exec(pqxx::transaction_base& tb, const std::string name, Args&&... args);
 };
 
 template <typename... Args>
-pqxx::result PreparedStatementManager::exec(pqxx::transaction_base& tb, const std::string& name, Args&&... args) {
+pqxx::result PreparedStatementManager::exec(pqxx::transaction_base& tb, const std::string name, Args&&... args) {
 	try {
 		if (!isRegistered(name)) {
 			throw std::runtime_error("Unknown prepared statement name: " + name);

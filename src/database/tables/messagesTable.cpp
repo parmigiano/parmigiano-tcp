@@ -1,8 +1,11 @@
 #include "database/tables/messagesTable.h"
 
+#include "database/database.h"
+
 MessagesTable::MessagesTable() {
-	/*_Logger = Logger::get_instance();
-	_PreparedStatementManager = PreparedStatementManager::get_instance();*/
+    _Database = std::make_shared<Database>();
+
+    initStatements();
 }
 
 void MessagesTable::initStatements() {
@@ -11,12 +14,16 @@ void MessagesTable::initStatements() {
                                                                     RETURNING id;)");
 
     _PreparedStatementManager->registerStatement("updateIsPinned", R"(UPDATE messages
-                                                                    SET is_pinned = TRUE,
+                                                                    SET is_pinned = TRUE
                                                                     WHERE id = $1
                                                                     AND chat_id = $2;)");
 
     _PreparedStatementManager->registerStatement("updateIsEdited", R"(UPDATE messages
-                                                                    SET is_edited = TRUE,
+                                                                    SET is_edited = TRUE
+                                                                    WHERE id = $1
+                                                                    AND chat_id = $2;)");
+
+    _PreparedStatementManager->registerStatement("deleteMessage", R"(DELETE FROM messages
                                                                     WHERE id = $1
                                                                     AND chat_id = $2;)");
 
@@ -32,7 +39,7 @@ void MessagesTable::initStatements() {
 
 uint64_t MessagesTable::addMessage(uint64_t& UID, uint64_t& chat_id, std::string& content, std::string& content_type) {
     try {
-        //std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+        std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
         pqxx::work transaction(*_Connection);
 
         pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "addMessage", chat_id, UID, content, content_type);
@@ -45,15 +52,17 @@ uint64_t MessagesTable::addMessage(uint64_t& UID, uint64_t& chat_id, std::string
     }
     catch (const std::exception& error) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+        return uint64_t();
     }
     catch (...) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+        return uint64_t();
     }
 }
 
 void MessagesTable::updateIsPinned(uint64_t& chat_id, uint64_t& message_id) {
     try {
-        //std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+        std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
         pqxx::work transaction(*_Connection);
 
         pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "updateIsPinned", message_id, chat_id);
@@ -70,7 +79,7 @@ void MessagesTable::updateIsPinned(uint64_t& chat_id, uint64_t& message_id) {
 
 void MessagesTable::updateIsEdited(uint64_t& chat_id, uint64_t& message_id) {
     try {
-        //std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+        std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
         pqxx::work transaction(*_Connection);
 
         pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "updateIsEdited", message_id, chat_id);
@@ -85,10 +94,27 @@ void MessagesTable::updateIsEdited(uint64_t& chat_id, uint64_t& message_id) {
     }
 }
 
+void MessagesTable::deleteMessage(uint64_t& chat_id, uint64_t& message_id) {
+    try {
+        std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
+        pqxx::work transaction(*_Connection);
+
+        pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "deleteMessage", message_id, chat_id);
+
+        transaction.commit();
+    }
+    catch (const std::exception& error) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+    }
+    catch (...) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+    }
+}
+
 std::map <std::string, std::string> MessagesTable::getMessageInfo(uint64_t& message_id) {
     try {
         std::map <std::string, std::string> message_info_map;
-        //std::shared_ptr<pqxx::connection> conn = _Database->getConnection();
+        std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
         pqxx::work transaction(*_Connection);
 
         pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getMessageInfo", message_id);
@@ -107,8 +133,10 @@ std::map <std::string, std::string> MessagesTable::getMessageInfo(uint64_t& mess
     }
     catch (const std::exception& error) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+        return std::map <std::string, std::string>();
     }
     catch (...) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+        return std::map <std::string, std::string>();
     }
 }

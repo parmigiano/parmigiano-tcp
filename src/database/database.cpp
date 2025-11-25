@@ -1,20 +1,10 @@
 #include "database/database.h"
 
-Database* Database::instance_ptr_ = nullptr;
-std::mutex Database::instance_mtx_;
+std::shared_ptr<pqxx::connection> _Connection;
 
 Database::Database() {
 	_Logger = Logger::get_instance();
 	_Config = Config::get_instance();
-}
-
-Database* Database::get_instance() {
-	std::lock_guard<std::mutex> lock(instance_mtx_);
-	if (instance_ptr_ == nullptr) {
-		instance_ptr_ = new Database();
-	}
-
-	return instance_ptr_;
 }
 
 void Database::initialize(const std::string& conn_str) {
@@ -24,7 +14,7 @@ void Database::initialize(const std::string& conn_str) {
 
 void Database::createConnection() {
 	try {
-		conn_ = std::shared_ptr<pqxx::connection>(
+		_Connection = std::shared_ptr<pqxx::connection>(
 			new pqxx::connection(connection_string_),
 			[](pqxx::connection* connection) {
 				if (connection && connection->is_open()) {
@@ -34,7 +24,7 @@ void Database::createConnection() {
 			}
 		);
 
-		if (conn_ && conn_->is_open()) {
+		if (_Connection && _Connection->is_open()) {
 			_Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Successful connect", 2);
 		}
 		else {
@@ -51,7 +41,7 @@ void Database::createConnection() {
 
 void Database::diconnect() {
 	try {
-		conn_->close();
+		_Connection->close();
 	}
 	catch (const std::exception& error) {
 		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
@@ -67,5 +57,5 @@ void Database::reconnect() {
 }
 
 std::shared_ptr<pqxx::connection> Database::getConnection() {
-	return conn_;
+	return _Connection;
 }

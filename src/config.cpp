@@ -1,5 +1,7 @@
 #include "config.h"
 
+//#include <iostream> /////////////////////////////////
+
 Config* Config::instance_ptr_ = nullptr;
 std::mutex Config::mtx_;
 
@@ -140,7 +142,8 @@ void Config::varsFillingCheck() {
     try {
         for (auto& [key, value] : configuration_vars_) {
             if (value == "null") {
-                throw std::runtime_error("Important Key: \"" + key + "\" isnt added in config. Please solve this problem");
+                //throw std::runtime_error("Important Key: \"" + key + "\" isnt added in config. Please solve this problem");
+                //std::cout << "Important Key: \"" + key + "\" isnt added in config. Please solve this problem" << std::endl;
             }
         }
     }

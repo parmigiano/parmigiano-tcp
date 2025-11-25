@@ -1,13 +1,16 @@
 #include "database/preparedStatementManager.h"
 
+#include "database/database.h"
+
 PreparedStatementManager* PreparedStatementManager::instance_ptr_ = nullptr;
 std::mutex PreparedStatementManager::instance_mtx_;
 
 PreparedStatementManager::PreparedStatementManager() {
-    _Database = Database::get_instance();
+    //_Database = Database::get_instance();
+    _Database = std::make_shared<Database>();
     _Logger = Logger::get_instance();
 
-    conn_ = _Database->getConnection();
+    _Connection = _Database->getConnection();
 }
 
 PreparedStatementManager* PreparedStatementManager::get_instance() {
@@ -22,12 +25,17 @@ PreparedStatementManager* PreparedStatementManager::get_instance() {
 void PreparedStatementManager::registerStatement(const std::string& name, const std::string& query) {
     try {
         if (!isRegistered(name)) {
+
+            /*pqxx::work transaction(*_Connection);
+            transaction.exec("DEALLOCATE " + name);
+            transaction.commit();*/
+
             prepared_[name] = query;
-            conn_->prepare(name, query);
+            _Connection->prepare(name, query);
             _Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Registered: " + name, 2);
         }
         else {
-            _Logger->addServerLog(_Logger->info, MODULE_NAME_ + "Statement: \"" + name + "\" alredy exist", 2);
+            //_Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Statement: \"" + name + "\" alredy exist", 2);
         }
     }
     catch (const std::exception& error) {
@@ -45,7 +53,7 @@ bool PreparedStatementManager::isRegistered(const std::string& name) {
 void PreparedStatementManager::reprepareAll() {
     try {
         for (auto& [name, query] : prepared_) {
-            conn_->prepare(name, query);
+            _Connection->prepare(name, query);
             _Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Reprepared: " + name, 2);
         }
     }

@@ -8,6 +8,7 @@
 #include <string>
 
 class ClientShutdown;
+class Session;
 
 class ClientInfoCheck {
 private:
@@ -16,12 +17,12 @@ private:
 
 	std::shared_ptr<ClientShutdown> _ClientShutdown;
 
-	bool checkUID(uint64_t& UID, boost::asio::ip::tcp::socket& client_socket);
+	bool checkUID(uint64_t& UID, Session* session);
 
 	const std::string MODULE_NAME_ = "(ClientInfoCheck)";
 public:
 	ClientInfoCheck();
 	~ClientInfoCheck() = default;
 
-	bool checkInfoFullness(ClientRequestStruct::Request& accepted_request, boost::asio::ip::tcp::socket& client_socket);
+	bool checkInfoFullness(ClientRequestStruct::Request& accepted_request, Session* session);
 };

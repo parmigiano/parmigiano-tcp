@@ -2,6 +2,7 @@
 
 #include <regex>
 #include <filesystem>
+#include <session/session.h>
 
 SendResponse::SendResponse(){
     _Logger = Logger::get_instance();
@@ -87,35 +88,6 @@ void SendResponse::setDisconnectInfo(std::string& description, short int& code) 
         }
 }
 
-//
-//void SendResponse::setDisconnectDescription(std::string& description) {
-//    try {
-//        auto* disconnect_info = _Response->mutable_disconnectnotifying();
-//
-//        disconnect_info->set_description(description);
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-//
-//void SendResponse::setDisconnectCode(short int& code) {
-//    try {
-//        auto* disconnect_info = _Response->mutable_disconnectnotifying();
-//
-//        disconnect_info->set_code(code);
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-
 void SendResponse::setClientActiveInfo(uint64_t& UID, bool status) {
     try {
         auto* client_active_info = _Response->mutable_clientactive();
@@ -130,34 +102,6 @@ void SendResponse::setClientActiveInfo(uint64_t& UID, bool status) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
     }
 }
-
-//void SendResponse::setClientActiveUID(uint64_t& UID) {
-//    try {
-//        auto* client_active = _Response->mutable_clientactivepacket();
-//
-//        client_active->set_uid(UID);
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-//
-//void SendResponse::setClientActiveOnlineStatus(bool status) {
-//    try {
-//        auto* client_active = _Response->mutable_clientactivepacket();
-//
-//        client_active->set_online(status);
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
 
 void SendResponse::setSendMessageInfo(uint64_t& message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at) {
     try {
@@ -178,78 +122,6 @@ void SendResponse::setSendMessageInfo(uint64_t& message_id, uint64_t& chat_id, u
     }
 }
 
-//void SendResponse::setSendMessageID() {
-//    try {
-//        auto* message_info = _Response->mutable_clientsendmessagepacket();
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-//
-//void SendResponse::setSendMessageChatID() {
-//    try {
-//        auto* message_info = _Response->mutable_clientsendmessagepacket();
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-//
-//void SendResponse::setSendMessageSenderUID() {
-//    try {
-//        auto* message_info = _Response->mutable_clientsendmessagepacket();
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-//
-//void SendResponse::setSendMessageContent() {
-//    try {
-//        auto* message_info = _Response->mutable_clientsendmessagepacket();
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-//
-//void SendResponse::setSendMessageContentType() {
-//    try {
-//        auto* message_info = _Response->mutable_clientsendmessagepacket();
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-//
-//void SendResponse::setSendMessageDeliveredAt() {
-//    try {
-//        auto* message_info = _Response->mutable_clientsendmessagepacket();
-//    }
-//    catch (const std::exception& error) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-//    }
-//    catch (...) {
-//        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-//    }
-//}
-
 void SendResponse::clearResponse(){
     _Response->Clear();
 }
@@ -269,16 +141,13 @@ void SendResponse::setReadMessageInfo(uint64_t& message_id, uint64_t& chat_id) {
     }
 }
 
-void SendResponse::setPinnedMessageInfo(uint64_t& message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at) {
+void SendResponse::setPinnedMessageInfo(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id) {
     try {
         auto* pinned_message_info = _Response->mutable_clientpinmessage();
 
-        pinned_message_info->set_message_id(message_id);
+        pinned_message_info->set_uid(UID);
         pinned_message_info->set_chat_id(chat_id);
-        pinned_message_info->set_sender_uid(sender_UID);
-        pinned_message_info->set_content(content);
-        pinned_message_info->set_content_type(content_type); 
-        pinned_message_info->set_delivered_at(delivered_at);
+        pinned_message_info->set_message_id(message_id);
     }
     catch (const std::exception& error) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
@@ -307,6 +176,38 @@ void SendResponse::setEditedMessageInfo(uint64_t& message_id, uint64_t& chat_id,
     }
 }
 
+void SendResponse::setDeletedMessageInfo(uint64_t& message_id, uint64_t& chat_id) {
+    try {
+        auto* deleted_message_info = _Response->mutable_clientdeletemessage();
+
+        deleted_message_info->set_message_id(message_id);
+        deleted_message_info->set_chat_id(chat_id);
+    }
+    catch (const std::exception& error) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+    }
+    catch (...) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+    }
+}
+
+void SendResponse::setTypingInfo(uint64_t& UID, uint64_t& chat_id, bool& is_typing) {
+    try {
+        auto* client_typing_info = _Response->mutable_clienttyping();
+
+
+        client_typing_info->set_uid(UID);
+        client_typing_info->set_chat_id(chat_id);
+        client_typing_info->set_is_typing(is_typing);
+    }
+    catch (const std::exception& error) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+    }
+    catch (...) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+    }
+}
+
 std::ifstream SendResponse::openFile(std::string& filepath, unsigned int& file_size) {
     std::ifstream file(filepath, std::ios::in | std::ios::binary);
 
@@ -321,29 +222,36 @@ std::ifstream SendResponse::openFile(std::string& filepath, unsigned int& file_s
     return file;
 }
 
-void SendResponse::sendResponse(boost::asio::ip::tcp::socket& client_socket) {
+void SendResponse::sendResponse(Session& session) {
     try {
         std::string data;
 
         if (!_Response->SerializeToString(&data)) {
-            _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Failed to serialize request", 2);
+            throw std::runtime_error("Failed to serialize request");
+            //_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Failed to serialize request", 2);
         }
 
         if (_Response->responseinfo().type() == ResponseStruct::ResponseInfo::unknown) {
-            _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Request will not sending with type requestInfo->requestType: unknown", 2);
+            //_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " Request will not sending with type requestInfo->requestType: unknown", 2);
+            throw std::runtime_error("Request will not sending with type requestInfo->requestType: unknown");
         }
 
         uint32_t size = static_cast<uint32_t>(data.size());
-        uint32_t size_net = htonl(size);
+        //uint32_t size_net = size;
 
-        std::string send_buffer;
-        send_buffer.resize(4 + data.size());
+        auto send_buffer = std::make_shared<std::string>();
+        send_buffer->resize(4 + data.size());
 
-        std::memcpy(send_buffer.data(), &size_net, 4);
-        std::memcpy(send_buffer.data() + 4, data.data(), data.size()); // preparing header + body
+        std::memcpy(send_buffer->data(), &size, 4);
+        std::memcpy(send_buffer->data() + 4, data.data(), data.size()); // preparing header + body
 
-        client_socket.async_send(boost::asio::buffer(send_buffer), 0, [this](const boost::system::error_code& error, std::size_t bytes) { 
-            _Config->write_handler_ptr(error, bytes);
+        //auto self = shared_from_this();
+
+        boost::asio::ip::tcp::socket* client_socket = &session.socket();
+
+        client_socket->async_send(boost::asio::buffer(*send_buffer), 0, [send_buffer, &session] (const boost::system::error_code& error, std::size_t bytes) {
+            //_Config->write_handler_ptr(error, bytes);
+            session.handleWrite(error, bytes);
         });
 
         data.clear();

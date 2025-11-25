@@ -3,96 +3,92 @@
 #include "connect_processing/sendResponse.h"
 #include "database/tables/chatMembersTable.h"
 #include "database/tables/userActivesTable.h"
+#include "session/session.h"
 
 UserStatusService::UserStatusService() {
 	_Logger = Logger::get_instance();
 	_SessionManager = SessionManager::get_instance();
-
-	//std::shared_ptr<SendResponse> _SendResponse;
-	//std::shared_ptr<ChatMembers> _ChatMembers;
-	//std::shared_ptr<UserActives> _UserActives;
 
 	_SendResponse = std::make_shared<SendResponse>();
 	_ChatMembers = std::make_shared<ChatMembersTable>();
 	_UserActives = std::make_shared<UserActivesTable>();
 }
 
-void UserStatusService::notifyOffline(boost::asio::ip::tcp::socket& client_socket) {
-	try {
-		uint64_t UID = _SessionManager->getUIDbySocket(client_socket);
+void UserStatusService::notifyOffline(Session& session) {
+	uint64_t UID;
 
-		notifyOffline(UID);
-	}
-	catch (const std::exception& error) {
-		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-	}
-	catch (...) {
-		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-	}
-}
-
-void UserStatusService::notifyOffline(uint64_t& UID) {
 	try {
+		UID = _SessionManager->getSessionUID(session);
 		std::vector <uint64_t> interlocutors = _ChatMembers->getListOfAllInterlocutors(UID);
+		
+		_UserActives->setOnlineStatusByUID(UID, _UserActives->offline);
+
+		_Logger->addSessionLog(_Logger->info, UID, "Status changed to offline", 0);
 
 		if (interlocutors.empty()) {
-			_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " User: " + std::to_string(UID)+ " havent interlocutors", 2);
+			return;
 		}
 
 		for (uint64_t& interlocutor_uid : interlocutors) {
-			boost::asio::ip::tcp::socket& sock = _SessionManager->getSessionSocket(interlocutor_uid);
-			// notify that one of the participants is offline
+			bool interlocutor_session_active = _SessionManager->sessionExist(interlocutor_uid);
+
+			if (!interlocutor_session_active) {
+				continue;
+			}
+
+			Session* session = _SessionManager->getSessionByUID(interlocutor_uid);
+
+			// notify that one of the interlocutors is offline
 			_SendResponse->setClientActiveInfo(interlocutor_uid, false);
 			_SendResponse->setResponseType(user_online_status);
 
-			_SendResponse->sendResponse(sock);
+			_SendResponse->sendResponse(*session);
 		}
-
-		_UserActives->setOnlineStatusByUID(UID, _UserActives->offline);
-		_SessionManager->removeClientFromTable(UID);
 	}
 	catch (const std::exception& error) {
-		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+		_Logger->addSessionLog(_Logger->warn, UID, MODULE_NAME_ + " except: " + std::string(error.what()), 0);
 	}
 	catch (...) {
-		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+		_Logger->addSessionLog(_Logger->warn, UID, MODULE_NAME_ + " catch unknw error", 0);
 	}
 }
 
-void UserStatusService::notifyOnline(boost::asio::ip::tcp::socket& client_socket) {
-	try {
-		uint64_t UID = _SessionManager->getUIDbySocket(client_socket);
+void UserStatusService::notifyOnline(Session& session) {
+	uint64_t UID;
 
-		notifyOffline(UID);
-	}
-	catch (const std::exception& error) {
-		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
-	}
-	catch (...) {
-		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
-	}
-}
-
-void UserStatusService::notifyOnline(uint64_t& UID) {
 	try {
+		UID = _SessionManager->getSessionUID(session);
 		std::vector <uint64_t> interlocutors = _ChatMembers->getListOfAllInterlocutors(UID);
 
+		_UserActives->setOnlineStatusByUID(UID, _UserActives->online);
+
+		_Logger->addSessionLog(_Logger->info, UID, "Status changed to online", 0);
+
+		if (interlocutors.empty()) {
+			return;
+		}
+
 		for (uint64_t& interlocutor_uid : interlocutors) {
-			boost::asio::ip::tcp::socket& sock = _SessionManager->getSessionSocket(interlocutor_uid);
-			// notify that one of the participants is online
+			bool interlocutor_session_active = _SessionManager->sessionExist(interlocutor_uid);
+			Session* session = _SessionManager->getSessionByUID(interlocutor_uid);
+
+			if (!interlocutor_session_active) {
+				continue;
+			}
+
+			// notify that one of the interlocutors is online
 			_SendResponse->setResponseType(user_online_status);
 			_SendResponse->setClientActiveInfo(interlocutor_uid, true);
 
-			_SendResponse->sendResponse(sock);
+			_SendResponse->sendResponse(*session);
 		}
 
 		//_SessionManager->updateLastActivity(UID);
-		_UserActives->setOnlineStatusByUID(UID, _UserActives->online);
 	}
 	catch (const std::exception& error) {
-		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+		_Logger->addSessionLog(_Logger->warn, UID, MODULE_NAME_ + " except: " + std::string(error.what()), 0);
 	}
 	catch (...) {
-		_Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+		_Logger->addSessionLog(_Logger->warn, UID, MODULE_NAME_ + " catch unknw error", 0);
 	}
 }
