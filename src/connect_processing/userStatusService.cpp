@@ -19,8 +19,16 @@ void UserStatusService::notifyOffline(Session& session) {
 
 	try {
 		UID = _SessionManager->getSessionUID(session);
+
+		//auto start = std::chrono::high_resolution_clock::now();
+
 		std::vector <uint64_t> interlocutors = _ChatMembers->getListOfAllInterlocutors(UID);
 		
+		/*auto end = std::chrono::high_resolution_clock::now();
+		auto micro = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+		_Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Offline status processed for " + std::to_string(micro.count()) + "us (micro seconds)", 2);*/
+
 		_UserActives->setOnlineStatusByUID(UID, _UserActives->offline);
 
 		_Logger->addSessionLog(_Logger->info, UID, "Status changed to offline", 0);
@@ -44,6 +52,7 @@ void UserStatusService::notifyOffline(Session& session) {
 
 			_SendResponse->sendResponse(*session);
 		}
+
 	}
 	catch (const std::exception& error) {
 		_Logger->addSessionLog(_Logger->warn, UID, MODULE_NAME_ + " except: " + std::string(error.what()), 0);
@@ -58,7 +67,15 @@ void UserStatusService::notifyOnline(Session& session) {
 
 	try {
 		UID = _SessionManager->getSessionUID(session);
+
+		//auto start = std::chrono::high_resolution_clock::now();
+
 		std::vector <uint64_t> interlocutors = _ChatMembers->getListOfAllInterlocutors(UID);
+
+		/*auto end = std::chrono::high_resolution_clock::now();
+		auto micro = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+		_Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Online status processed for " + std::to_string(micro.count()) + "us (micro seconds)", 2);*/
 
 		_UserActives->setOnlineStatusByUID(UID, _UserActives->online);
 

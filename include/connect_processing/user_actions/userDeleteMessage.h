@@ -16,6 +16,10 @@ private:
 	std::shared_ptr<MessageStatusesTable> _MessageStatuses;
 	std::shared_ptr<MessagesTable> _MessagesTable;
 
+	//bool checkActionAvailable();
+	//bool checkUserBlock();
+	//bool checkInfoCorrectness();
+	void notifyChatMembers(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id);
 	void updateTable(uint64_t& chat_id, uint64_t& message_id);
 
 	const std::string MODULE_NAME_ = "(UserDeleteMessage)";
@@ -24,5 +28,4 @@ public:
 	~UserDeleteMessage() = default;
 
 	void processing(ClientContext& context) override;
-	void notifyChatMembers(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id);
 };

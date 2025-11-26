@@ -14,9 +14,13 @@ void MessagesTable::initStatements() {
                                                                     RETURNING id;)");
 
     _PreparedStatementManager->registerStatement("updateIsPinned", R"(UPDATE messages
-                                                                    SET is_pinned = TRUE
-                                                                    WHERE id = $1
-                                                                    AND chat_id = $2;)");
+                                                                    SET is_pinned = $1
+                                                                    WHERE id = $2
+                                                                    AND chat_id = $3;)");
+
+    _PreparedStatementManager->registerStatement("getPinStatus", R"(SELECT is_pinned
+                                                                    FROM messages
+                                                                    WHERE id = $1;)");
 
     _PreparedStatementManager->registerStatement("updateIsEdited", R"(UPDATE messages
                                                                     SET is_edited = TRUE
@@ -33,6 +37,11 @@ void MessagesTable::initStatements() {
                                                                     sender_uid,
                                                                     content,
                                                                     content_type
+                                                                    FROM messages
+                                                                    WHERE id = $1;)");
+
+    _PreparedStatementManager->registerStatement("getMessageContent", R"(SELECT
+                                                                    content
                                                                     FROM messages
                                                                     WHERE id = $1;)");
 }
@@ -60,12 +69,12 @@ uint64_t MessagesTable::addMessage(uint64_t& UID, uint64_t& chat_id, std::string
     }
 }
 
-void MessagesTable::updateIsPinned(uint64_t& chat_id, uint64_t& message_id) {
+void MessagesTable::updateIsPinned(uint64_t& chat_id, uint64_t& message_id, bool pin_status) {
     try {
         std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
         pqxx::work transaction(*_Connection);
 
-        pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "updateIsPinned", message_id, chat_id);
+        pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "updateIsPinned", pin_status, message_id, chat_id);
 
         transaction.commit();
     }
@@ -74,6 +83,29 @@ void MessagesTable::updateIsPinned(uint64_t& chat_id, uint64_t& message_id) {
     }
     catch (...) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+    }
+}
+
+bool MessagesTable::getPinStatus(uint64_t& message_id) {
+    try {
+        std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
+        pqxx::work transaction(*_Connection);
+
+        pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getPinStatus", message_id);
+
+        bool pin_status = txn_result[0][0].as<bool>();
+
+        transaction.commit();
+
+        return pin_status;
+    }
+    catch (const std::exception& error) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+        return bool();
+    }
+    catch (...) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+        return bool();
     }
 }
 
@@ -138,5 +170,28 @@ std::map <std::string, std::string> MessagesTable::getMessageInfo(uint64_t& mess
     catch (...) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
         return std::map <std::string, std::string>();
+    }
+}
+
+std::string MessagesTable::getMessageContent(uint64_t& message_id) {
+    try {
+        std::shared_ptr<pqxx::connection> _Connection = _Database->getConnection();
+        pqxx::work transaction(*_Connection);
+
+        pqxx::result txn_result = _PreparedStatementManager->exec(transaction, "getMessageContent", message_id);
+
+        std::string message_content = txn_result[0][0].as<std::string>();
+
+        transaction.commit();
+
+        return message_content;
+    }
+    catch (const std::exception& error) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
+        return std::string();
+    }
+    catch (...) {
+        _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " catch unknw error", 2);
+        return std::string();
     }
 }

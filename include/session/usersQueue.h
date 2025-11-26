@@ -1,6 +1,7 @@
 #pragma once
 
 //#include <session/session.h>
+//#include <connect_processing/requestProcessing.h>
 #include <string>
 #include <boost/asio.hpp>
 #include <queue>
@@ -18,6 +19,8 @@ struct ConnectionInfoFields {
 
 class UsersQueue {
 private:
+	//RequestProcessing* _RequestProcessing;
+
 	std::shared_ptr<RequestProcessing> _RequestProcessing;
 
 	static UsersQueue* instance_ptr_;
@@ -28,6 +31,6 @@ public:
 
 	static UsersQueue* get_instance();
 
-	void addUserToQueue(std::string request, Session& session);
+	void addUserToQueue(std::string& request, Session& session);
 	void queueHandler();
 };

@@ -70,8 +70,6 @@ jobs:
             bash pre-deploy
 
             cd /root/parmigiano-tcp/build
-            rm -rf * 
-            cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
             ninja -j$(nproc)
 
             cd /root/parmigiano-tcp/scripts

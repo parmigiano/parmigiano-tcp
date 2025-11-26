@@ -23,13 +23,15 @@ void UserSendMessage::processing(ClientContext& context) {
 
         UID = request.mutable_clientsendmessagepacket()->uid();
         uint64_t chat_id = request.mutable_clientsendmessagepacket()->chat_id();
+        uint64_t temp_message_id = request.mutable_clientsendmessagepacket()->temp_message_id();
         std::string content = request.mutable_clientsendmessagepacket()->content();
         std::string content_type = request.mutable_clientsendmessagepacket()->content_type();
 
-        uint64_t message_id = _MessagesTable->addMessage(UID, chat_id, content, content_type);
+        uint64_t message_id = addToTable(UID, chat_id, content, content_type);
 
         _Logger->addSessionLog(_Logger->info, UID, "Send message (size): " + std::to_string(content.size()) + " Message (id): " + std::to_string(message_id) + " To chat (id): " + std::to_string(chat_id), 0);
 
+        sendToSender(message_id, temp_message_id, chat_id, UID, content, content_type);
         sendMessageToChatMembers(message_id, chat_id, UID, content, content_type);
     }
     catch (const std::exception& error) {
@@ -40,8 +42,27 @@ void UserSendMessage::processing(ClientContext& context) {
     }
 }
 
+void UserSendMessage::sendToSender(uint64_t& message_id, uint64_t& temp_message_id, uint64_t& chat_id, uint64_t& UID, std::string& content, std::string& content_type) {
+    std::string delivered_at = _MessageStatuses->addMessage(message_id, UID);
+    Session& session = *_SessionManager->getSessionByUID(UID);
+
+    _SendResponse->setResponseType(send_message);
+    _SendResponse->setSendMessageInfo(
+        message_id,
+        temp_message_id,
+        chat_id,
+        UID,
+        content,
+        content_type,
+        delivered_at
+    );
+
+    _SendResponse->sendResponse(session);
+}
+
 void UserSendMessage::sendMessageToChatMembers(uint64_t& message_id, uint64_t& chat_id, uint64_t& UID, std::string& content, std::string& content_type) {
     std::vector<uint64_t> chat_members = _ChatMembersTable->getListOfChatMembers(UID, chat_id);
+    uint64_t temp_message_id = 0; // because send message to not sender
 
     if (chat_members.empty()) {
         return;
@@ -49,17 +70,18 @@ void UserSendMessage::sendMessageToChatMembers(uint64_t& message_id, uint64_t& c
 
     for (uint64_t& member_uid : chat_members) {
         bool member_online_status = _SessionManager->sessionExist(member_uid);
-        std::string delivered_at = _MessageStatuses->addMessage(message_id, member_uid);
 
         if (!member_online_status) {
             continue;
         }
 
+        std::string delivered_at = _MessageStatuses->addMessage(message_id, member_uid);
         Session& session = *_SessionManager->getSessionByUID(member_uid);
 
         _SendResponse->setResponseType(send_message);
         _SendResponse->setSendMessageInfo(
             message_id,
+            temp_message_id,
             chat_id,
             UID,
             content,
@@ -69,4 +91,10 @@ void UserSendMessage::sendMessageToChatMembers(uint64_t& message_id, uint64_t& c
 
         _SendResponse->sendResponse(session);
     }
+}
+
+uint64_t UserSendMessage::addToTable(uint64_t& UID, uint64_t& chat_id, std::string& content, std::string& content_type) {
+    //uint64_t message_id = _MessagesTable->addMessage(UID, chat_id, content, content_type);
+
+    return _MessagesTable->addMessage(UID, chat_id, content, content_type);
 }

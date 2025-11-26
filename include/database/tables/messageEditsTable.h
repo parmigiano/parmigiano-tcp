@@ -18,4 +18,8 @@ private:
 public:
 	MessageEditsTable();
 	~MessageEditsTable() = default;
+
+	void initStatements() override;
+
+	void addNewMeesageEdit(uint64_t& message_id, std::string& old_content, std::string& new_content, uint64_t& editor_uid);
 };
