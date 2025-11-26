@@ -17,8 +17,11 @@ private:
 	std::shared_ptr<MessagesTable> _MessagesTable;
 	//std::shared_ptr<MessageStatusesTable> _MessageStatuses;
 
-	void notifyChatMembers(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id);
-	void updateTable(uint64_t& chat_id, uint64_t& message_id);
+	//bool checkActionAvailable();
+	//bool checkUserBlock();
+	//bool checkInfoCorrectness();
+	void notifyChatMembers(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id, bool& pin_status);
+	void updateTable(uint64_t& chat_id, uint64_t& message_id, bool& pin_status);
 
 	const std::string MODULE_NAME_ = "(UserPinMessage)";
 public:

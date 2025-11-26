@@ -103,11 +103,12 @@ void SendResponse::setClientActiveInfo(uint64_t& UID, bool status) {
     }
 }
 
-void SendResponse::setSendMessageInfo(uint64_t& message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at) {
+void SendResponse::setSendMessageInfo(uint64_t& message_id, uint64_t& temp_message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at) {
     try {
         auto* message_info = _Response->mutable_clientsendmessage();
 
         message_info->set_message_id(message_id);
+        message_info->set_temp_message_id(temp_message_id);
         message_info->set_chat_id(chat_id);
         message_info->set_sender_uid(sender_UID);
         message_info->set_content(content);
@@ -141,13 +142,14 @@ void SendResponse::setReadMessageInfo(uint64_t& message_id, uint64_t& chat_id) {
     }
 }
 
-void SendResponse::setPinnedMessageInfo(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id) {
+void SendResponse::setPinnedMessageInfo(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id, bool& pin_status) {
     try {
         auto* pinned_message_info = _Response->mutable_clientpinmessage();
 
         pinned_message_info->set_uid(UID);
         pinned_message_info->set_chat_id(chat_id);
         pinned_message_info->set_message_id(message_id);
+        pinned_message_info->set_pin_status(pin_status);
     }
     catch (const std::exception& error) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);

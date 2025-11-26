@@ -14,6 +14,18 @@
 #include "connect_processing/user_actions/userSendMessage.h"
 #include "connect_processing/user_actions/userTyping.h"
 
+//RequestProcessing* RequestProcessing::instance_ptr_ = nullptr;
+//std::mutex RequestProcessing::mtx_;
+//
+//RequestProcessing* RequestProcessing::get_instance() {
+//    std::lock_guard<std::mutex> lock(mtx_);
+//    if (instance_ptr_ == nullptr) {
+//        instance_ptr_ = new RequestProcessing();
+//    }
+//
+//    return instance_ptr_;
+//}
+
 RequestProcessing::RequestProcessing() {
     _Logger = Logger::get_instance();
     _Config = Config::get_instance();
@@ -34,12 +46,13 @@ RequestProcessing::RequestProcessing() {
     initNamesMap();
 }
 
-void RequestProcessing::requestDistribution(std::string request_str, Session& session) {
+void RequestProcessing::requestDistribution(std::string& request_str, Session& session) {
     try {
         //auto start = std::chrono::high_resolution_clock::now();
 
         ClientRequestStruct::Request accepted_request;
-        accepted_request.ParseFromString(request_str);
+        accepted_request.ParseFromArray(request_str.data(), request_str.size());
+        //accepted_request.ParseFromString(request_str);
         // boost::asio::ip::tcp::socket& client_socket = session.socket();
 
         /*if (!_ClientInfoCheck->checkInfoFullness(accepted_request, client_socket)) {
@@ -62,14 +75,12 @@ void RequestProcessing::requestDistribution(std::string request_str, Session& se
         }
         else {
             _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " unkwn requst type", 2);
-        }
+        } 
 
         /*auto end = std::chrono::high_resolution_clock::now();
-        auto micros = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+        auto micro = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
 
-        std::string result = std::to_string(micros.count());
-
-        _Logger->addServerLog(_Logger->info, MODULE_NAME_ + "" + result, 2);*/
+        _Logger->addServerLog(_Logger->info, MODULE_NAME_ + " Together processed for " + std::to_string(micro.count()) + "us (micro seconds)", 2);*/
     } 
     catch (const std::exception& error) {
         _Logger->addServerLog(_Logger->warn, MODULE_NAME_ + " except: " + std::string(error.what()), 2);
@@ -98,7 +109,7 @@ void RequestProcessing::initDistMap() {
         }},
 
         {ClientRequestStruct::RequestInfo::delete_message, [this](ClientContext& context) { // delete_message
-           _UserDeleteMessage->processing(context);
+            _UserDeleteMessage->processing(context);
         }},
 
         {ClientRequestStruct::RequestInfo::user_typing, [this](ClientContext& context) { // user_typing

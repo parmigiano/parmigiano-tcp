@@ -25,8 +25,10 @@ public:
 	void initStatements() override;
 
 	uint64_t addMessage(uint64_t& UID, uint64_t& chat_id, std::string& content, std::string& content_type);
-	void updateIsPinned(uint64_t& chat_id, uint64_t& message_id);
+	void updateIsPinned(uint64_t& chat_id, uint64_t& message_id, bool pin_status);
+	bool getPinStatus(uint64_t& message_id);
 	void updateIsEdited(uint64_t& chat_id, uint64_t& message_id);
 	void deleteMessage(uint64_t& chat_id, uint64_t& message_id);
 	std::map <std::string, std::string> getMessageInfo(uint64_t& message_id);
+	std::string getMessageContent(uint64_t& message_id);
 };

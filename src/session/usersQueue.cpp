@@ -13,6 +13,8 @@ std::condition_variable cv;
 std::queue<ConnectionInfoFields> connections;
 
 UsersQueue::UsersQueue() {
+    //_RequestProcessing = RequestProcessing::get_instance();
+
     _RequestProcessing = std::make_shared<RequestProcessing>();
 }
 
@@ -25,7 +27,7 @@ UsersQueue* UsersQueue::get_instance() {
     return instance_ptr_;
 }
 
-void UsersQueue::addUserToQueue(std::string request, Session& session) {
+void UsersQueue::addUserToQueue(std::string& request, Session& session) {
     std::lock_guard<std::mutex> lock(qmutex);
     connections.push( {request, session} );
     cv.notify_one();

@@ -41,9 +41,9 @@ public:
 
 	void setClientActiveInfo(uint64_t& UID, bool status);
 
-	void setSendMessageInfo(uint64_t& message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at);
+	void setSendMessageInfo(uint64_t& message_id, uint64_t& temp_message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at);
 	void setReadMessageInfo(uint64_t& message_id, uint64_t& chat_id);
-	void setPinnedMessageInfo(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id);
+	void setPinnedMessageInfo(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id, bool& pin_status);
 	void setEditedMessageInfo(uint64_t& message_id, uint64_t& chat_id, uint64_t& sender_UID, std::string& content, std::string& content_type, std::string& delivered_at);
 	void setDeletedMessageInfo(uint64_t& message_id, uint64_t& chat_id);
 	void setTypingInfo(uint64_t& UID, uint64_t& chat_id, bool& is_typing);

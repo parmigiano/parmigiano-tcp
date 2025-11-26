@@ -3,6 +3,7 @@
 #include <database/tables/chatMembersTable.h>
 #include <database/tables/messagesTable.h>
 #include "database/tables/messageStatusesTable.h"
+#include "database/tables/messageEditsTable.h"
 
 UserEditMessage::UserEditMessage() {
     _SessionManager = SessionManager::get_instance();
@@ -10,6 +11,7 @@ UserEditMessage::UserEditMessage() {
     _ChatMembersTable = std::make_shared<ChatMembersTable>();
     _MessageStatuses = std::make_shared<MessageStatusesTable>();
     _MessagesTable = std::make_shared<MessagesTable>();
+    _MessageEditsTable = std::make_shared<MessageEditsTable>();
 }
 
 void UserEditMessage::processing(ClientContext& context) {
@@ -32,7 +34,7 @@ void UserEditMessage::processing(ClientContext& context) {
         }*/
 
         notifyChatMembers(UID, chat_id, message_id, content, content_type);
-        updateTable(chat_id, message_id);
+        updateTable(chat_id, message_id, content, UID);
     }
     catch (const std::exception& error) {
         _Logger->addSessionLog(_Logger->warn, UID, MODULE_NAME_ + " except: " + std::string(error.what()), 0);
@@ -81,6 +83,10 @@ void UserEditMessage::notifyChatMembers(uint64_t& UID, uint64_t& chat_id, uint64
     }
 }
 
-void UserEditMessage::updateTable(uint64_t& chat_id, uint64_t& message_id) {
+void UserEditMessage::updateTable(uint64_t& chat_id, uint64_t& message_id, std::string& new_content, uint64_t& editor_uid) {
     _MessagesTable->updateIsEdited(chat_id, message_id);
+
+    std::string old_content = _MessagesTable->getMessageContent(message_id);
+
+    _MessageEditsTable->addNewMeesageEdit(message_id, old_content, new_content, editor_uid);
 }

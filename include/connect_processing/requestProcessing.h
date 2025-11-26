@@ -2,12 +2,13 @@
 
 #include "logger.h"
 #include "config.h"
-#include "connect_processing/clientContextStruct.h"
 #include "ClientRequestStruct.pb.h"
 #include "session/sessionManager.h"
+#include "connect_processing/clientContextStruct.h"
 
 #include <string>
 #include <memory>
+#include <mutex>
 #include <boost/asio.hpp>
 #include <functional>
 #include <unordered_map>
@@ -17,6 +18,8 @@ class Session;
 class SendResponse;
 class UserStatusService;
 class ClientInfoCheck;
+
+//class ClientContext;
 
 class UserDeleteMessage;
 class UserEditMessage;
@@ -30,6 +33,9 @@ private:
 	Config* _Config;
 	Logger* _Logger;
 	SessionManager* _SessionManager;
+
+	/*static RequestProcessing* instance_ptr_;
+	static std::mutex mtx_;*/
 
 	std::shared_ptr<SendResponse> _SendResponse;
 	std::shared_ptr<UserStatusService> _UserStatusService;
@@ -51,9 +57,12 @@ private:
 	const std::string MODULE_NAME_ = "(RequestProcessing)";
 public:
 	RequestProcessing();
+	/*RequestProcessing(const RequestProcessing&) = delete;*/
 	~RequestProcessing() = default;
 
-	void requestDistribution(std::string request_str, Session& session);
+	//static RequestProcessing* get_instance();
+
+	void requestDistribution(std::string& request_str, Session& session);
 
 	void handleUserActivePacket(ClientContext& context);
 };

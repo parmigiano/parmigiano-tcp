@@ -16,7 +16,6 @@ Session::Session(boost::asio::io_context& io_context) : client_socket_(io_contex
 
     //_UsersQueue = std::make_shared<UsersQueue>();
     _UserStatusService = std::make_shared<UserStatusService>();
-
 }
 
 void Session::handleDisconnect(const boost::system::error_code& error) {

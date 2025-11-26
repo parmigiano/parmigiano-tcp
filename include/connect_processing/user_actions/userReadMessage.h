@@ -18,6 +18,9 @@ private:
 	//std::shared_ptr<MessagesTable> _MessagesTable;
 	std::shared_ptr<MessageStatusesTable> _MessageStatuses;
 
+	//bool checkActionAvailable();
+	//bool checkUserBlock();
+	//bool checkInfoCorrectness();
 	void notifyChatMembers(uint64_t& chat_id, uint64_t& message_id, std::vector<uint64_t> chat_members);
 	void updateTable(uint64_t& message_id, std::vector<uint64_t> chat_members);
 

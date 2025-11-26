@@ -1,4 +1,6 @@
-﻿syntax = "proto3";
+﻿// ПЕРЕД ОТПРАВКОЙ ПАКЕТА, В НАЧАЛЕ ВСЕГДА 4 БАЙТА РАЗМЕРА ВСЕГО ПАКЕТА [lengthPrefix][protobuf]
+
+syntax = "proto3";
 
 package ClientRequestStruct;
 
@@ -48,6 +50,7 @@ message ClientSendMessagePacket {
     uint64 chat_id = 2; // в каком чате
 	string content = 3; // Само сообщение
 	string content_type = 4; // Тип сообщения 'text', 'image', ...
+	uint64 temp_message_id = 5; // Временный ID для клиента
 }
 
 // 5. Пакет когда пользователь прочитал сообщение
@@ -71,6 +74,7 @@ message ClientPinMessagePacket {
 	uint64 uid = 1; // мой uid
     uint64 chat_id = 2; // в каком чате
 	uint64 message_id = 3; // id закрепленного сообщения
+	bool pin_status = 4;
 }
 
 // 7. Пакет когда пользователь удалил сообщение
@@ -78,6 +82,11 @@ message ClientDeleteMessagePacket {
 	uint64 uid = 1; // кто удалил uid
     uint64 chat_id = 2; // в каком чате
 	uint64 message_id = 3; // id удаленного сообщения
+}
+
+message ClientMessageIsDeliveredPacket {
+    uint64 chat_id = 1; 
+	uint64 message_id = 2; 
 }
 
 message ClientInfo{

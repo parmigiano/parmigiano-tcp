@@ -1,3 +1,5 @@
+﻿// ПЕРЕД ОТПРАВКОЙ ПАКЕТА, В НАЧАЛЕ ВСЕГДА 4 БАЙТА РАЗМЕРА ВСЕГО ПАКЕТА [lengthPrefix][protobuf]
+
 syntax = "proto3";
 
 package ResponseStruct;
@@ -43,12 +45,13 @@ message ClientTyping {
 
 // client is send messga to chat/group
 message ClientSendMessage {
-	uint64 message_id = 1; // message id
-    uint64 chat_id = 2; // chaaaaaaatik
-    uint64 sender_uid = 3; // id of message sender
-	string content = 4; // text of the message
-	string content_type = 5; // type of the message 'text', 'media', ...
-	string delivered_at = 6; // time of delivered message
+	uint64 temp_message_id = 1; // temp message id
+	uint64 message_id = 2; // message id
+    uint64 chat_id = 3; // chaaaaaaatik
+    uint64 sender_uid = 4; // id of message sender
+	string content = 5; // text of the message
+	string content_type = 6; // type of the message 'text', 'media', ...
+	string delivered_at = 7; // time of delivered message
 }
 
 // client read message
@@ -69,9 +72,10 @@ message ClientEditMessage {
 
 // client pin message
 message ClientPinMessage {
-	uint64 uid = 1; // ��� uid
-    uint64 chat_id = 2; // � ����� ����
-	uint64 message_id = 3; // id ������������� ���������
+	uint64 uid = 1; // ìîé uid
+    uint64 chat_id = 2; // â êàêîì ÷àòå
+	uint64 message_id = 3; // id çàêðåïëåííîãî ñîîáùåíèÿ
+	bool pin_status = 4;
 }
 
 // client delete message

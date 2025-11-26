@@ -22,11 +22,17 @@ void UserPinMessage::processing(ClientContext& context) {
         UID = request.mutable_clientpinmessagepacket()->uid();
         uint64_t chat_id = request.mutable_clientpinmessagepacket()->chat_id();
         uint64_t message_id = request.mutable_clientpinmessagepacket()->message_id();
+        bool pin_status = _MessagesTable->getPinStatus(message_id) ? false : true;
 
-        _Logger->addSessionLog(_Logger->info, UID, "Pin message (id): " + std::to_string(message_id) + " In chat (id): " + std::to_string(chat_id), 0);
+        if (pin_status) {
+            _Logger->addSessionLog(_Logger->info, UID, "Pin message (id): " + std::to_string(message_id) + " In chat (id): " + std::to_string(chat_id), 0);
+        }
+        else {
+            _Logger->addSessionLog(_Logger->info, UID, "Unpin message (id): " + std::to_string(message_id) + " In chat (id): " + std::to_string(chat_id), 0);
+        }
 
-        notifyChatMembers(UID, chat_id, message_id);
-        updateTable(chat_id, message_id);
+        notifyChatMembers(UID, chat_id, message_id, pin_status);
+        updateTable(chat_id, message_id, pin_status);
     }
     catch (const std::exception& error) {
         _Logger->addSessionLog(_Logger->warn, UID, MODULE_NAME_ + " except: " + std::string(error.what()), 0);
@@ -36,7 +42,7 @@ void UserPinMessage::processing(ClientContext& context) {
     }
 }
 
-void UserPinMessage::notifyChatMembers(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id) {
+void UserPinMessage::notifyChatMembers(uint64_t& UID, uint64_t& chat_id, uint64_t& message_id, bool& pin_status) {
     std::vector<uint64_t> chat_members = _ChatMembersTable->getListOfChatMembers(UID, chat_id);
 
     if (chat_members.empty()) {
@@ -53,12 +59,12 @@ void UserPinMessage::notifyChatMembers(uint64_t& UID, uint64_t& chat_id, uint64_
         Session& session = *_SessionManager->getSessionByUID(member_uid);
 
         _SendResponse->setResponseType(send_message);
-        _SendResponse->setPinnedMessageInfo(UID, chat_id, message_id);
+        _SendResponse->setPinnedMessageInfo(UID, chat_id, message_id, pin_status);
 
         _SendResponse->sendResponse(session);
     }
 }
 
-void UserPinMessage::updateTable(uint64_t& chat_id, uint64_t& message_id) {
-    _MessagesTable->updateIsPinned(chat_id, message_id);
+void UserPinMessage::updateTable(uint64_t& chat_id, uint64_t& message_id, bool& pin_status) {
+    _MessagesTable->updateIsPinned(chat_id, message_id, pin_status);
 }
